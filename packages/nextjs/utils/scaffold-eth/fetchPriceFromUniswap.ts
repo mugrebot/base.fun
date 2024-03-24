@@ -44,7 +44,7 @@ export const fetchPriceFromUniswap = async (targetNetwork: ChainWithAttributes):
     });
 
     const token0Address = await publicClient.readContract({
-      ...wagmiConfig,
+      ...wagmiConfig, 
       functionName: "token0",
     });
 
