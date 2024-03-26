@@ -66,7 +66,7 @@ contract Token is ERC20, Ownable, ReentrancyGuard {
     }
 
     function calculateMintCost(uint256 currentSupply, uint256 mintAmount) public pure returns (uint256) {
-        return _sumOfPriceToNTokens(currentSupply + mintAmount) - _sumOfPriceToNTokens(currentSupply);
+        return ((_sumOfPriceToNTokens(currentSupply + mintAmount) - _sumOfPriceToNTokens(currentSupply))/(1e18*1e18));
     }
 
     function calculateBurnProceeds(uint256 amount) public view returns (uint256) {
@@ -82,7 +82,7 @@ contract Token is ERC20, Ownable, ReentrancyGuard {
 
     // The price of all tokens from number 1 to n.
     function _sumOfPriceToNTokens(uint256 n) internal pure returns (uint256) {
-        return n * (n + 1) * (2 * n + 1) / 6;
+        return (n + 1) * (2 * n + 1) / 6;
     }
 
     // Other functions...

@@ -632,7 +632,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Token: {
-      address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+      address: "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
       abi: [
         {
           inputs: [
