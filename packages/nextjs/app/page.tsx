@@ -16,11 +16,6 @@ const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
   const [currentPrice, setCurrentPrice] = useState<number | undefined>();
 
-  // Initialize Viem client for reading contract data
-  const publicClient = createPublicClient({
-    chain: mainnet,
-    transport: http(`${mainnet.rpcUrls.alchemy.http[0]}/yourAlchemyApiKey`),
-  });
 
   // Define your contract using Viem hooks
   const ABI = parseAbi([
@@ -62,67 +57,12 @@ const Home: NextPage = () => {
     abi: ABI,
   };
 
-  const reserves = await publicClient.readContract({
-    ...wagmiConfig,
-    functionName: "getReserves",
-  });
 
-
-  useEffect(() => {
-    // Function to fetch the current price for minting 1 token
-    const fetchCurrentPrice = async () => {
-      try {
-        // Assuming calculateMintCost is a view function that calculates the cost of minting 1 token
-        const priceForOneToken = await tokenContract.calculateMintCost(await tokenContract.totalSupply(), "1.0");
-        setCurrentPrice(parseFloat(priceForOneToken.toString()));
-      } catch (error) {
-        console.error("Error fetching current price:", error);
-      }
-    };
-
-    fetchCurrentPrice();
-  }, [tokenContract]);
-
-  // Adapted mint function using Viem
-  const mintToken = async () => {
-    const { write: mint, data, isLoading, isSuccess } = useContractWrite({
-      address: tokenContractAddress,
-      abi: tokenAbi.abi,
-      functionName: 'mint',
-      args: [1],
-      overrides: {
-        value: currentPrice // Make sure this is correctly formatted for your contract's mint function
-      },
-    });
-
-    if (isSuccess) {
-      console.log('Token minted successfully:', data);
-    }
-
-    if (isLoading) {
-      console.log('Minting in progress...');
-    }
-
-    try {
-      await mint();
-      alert("Token minted successfully!");
-    } catch (error) {
-      console.error("Minting failed:", error);
-    }
-  };
 
   return (
     <>
       <div className="flex items-center flex-col flex-grow pt-10">
         {/* Existing content */}
-        <div className="mt-8">
-          <button onClick={mintToken} className="btn btn-primary" disabled={!connectedAddress || !currentPrice}>
-            Mint Token
-          </button>
-          {currentPrice && (
-            <p className="text-lg mt-2">Current Price for 1 Token: {currentPrice} ETH</p>
-          )}
-        </div>
       </div>
     </>
   );

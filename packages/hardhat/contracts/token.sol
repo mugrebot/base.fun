@@ -9,106 +9,84 @@ import "./Interfaces/IUniswapV2Factory.sol";
 import "./Interfaces/IUniswapV2Router02.sol";
 
 contract Token is ERC20, Ownable, ReentrancyGuard {
-	using SafeERC20 for IERC20;
+    using SafeERC20 for IERC20;
 
-	uint256 public constant CURVE_CONSTANT = 1 ether;
-	uint256 public liquidityProvisionThreshold = 100 * 1e18;
+    uint256 public liquidityProvisionThreshold = 500 * 1e18;
+    bool public isLiquidityProvisionLocked = false;
 
-	IUniswapV2Router02 public uniswapV2Router;
-	address public uniswapV2Pair;
-	address public treasuryWallet;
+    IUniswapV2Router02 public uniswapV2Router;
+    address public uniswapV2Pair;
+    address public treasuryWallet;
 
-	mapping(address => bool) private _isExcludedFromFees;
-	mapping(address => bool) private automatedMarketMakerPairs;
+    mapping(address => bool) private _isExcludedFromFees;
+    mapping(address => bool) private automatedMarketMakerPairs;
 
-	error InsufficientETHSent();
-	error MintingExceedsThreshold();
-	error ZeroAddressUsed();
-	error UnauthorizedAccess();
+    error InsufficientETHSent();
+    error MintingExceedsThreshold();
+    error ZeroAddressUsed();
+    error UnauthorizedAccess();
+    error LiquidityProvisionLocked();
 
-	constructor(
-		string memory name_,
-		string memory symbol_,
-		address _uniswapV2RouterAddress
-	) ERC20(name_, symbol_) Ownable(msg.sender) {
-		if (_uniswapV2RouterAddress == address(0)) revert ZeroAddressUsed();
+    constructor(string memory name_, string memory symbol_, address _uniswapV2RouterAddress) ERC20(name_, symbol_) Ownable(msg.sender) {
+        if (_uniswapV2RouterAddress == address(0)) revert ZeroAddressUsed();
 
-		uniswapV2Router = IUniswapV2Router02(_uniswapV2RouterAddress);
-		uniswapV2Pair = IUniswapV2Factory(uniswapV2Router.factory()).createPair(
-				address(this),
-				uniswapV2Router.WETH()
-			);
+        uniswapV2Router = IUniswapV2Router02(_uniswapV2RouterAddress);
+        uniswapV2Pair = IUniswapV2Factory(uniswapV2Router.factory()).createPair(address(this), uniswapV2Router.WETH());
 
-		_isExcludedFromFees[owner()] = true;
-		_isExcludedFromFees[address(this)] = true;
-		automatedMarketMakerPairs[uniswapV2Pair] = true;
-	}
+        _isExcludedFromFees[owner()] = true;
+        _isExcludedFromFees[address(this)] = true;
+        automatedMarketMakerPairs[uniswapV2Pair] = true;
+    }
 
-	function mint(uint256 amount) public payable nonReentrant {
-		if (amount + totalSupply() > liquidityProvisionThreshold)
-			revert MintingExceedsThreshold();
-		uint256 mintCost = calculateMintCost(totalSupply(), amount);
-		if (msg.value < mintCost) revert InsufficientETHSent();
+    modifier whenNotLocked() {
+        require(!isLiquidityProvisionLocked, "Operation not allowed, contract is locked");
+        _;
+    }
 
-		//need to show corrected amount?
+    function mint(uint256 amount) public payable nonReentrant whenNotLocked {
+        uint256 mintCost = calculateMintCost(totalSupply(), amount);
+        require(msg.value >= mintCost, "Insufficient ETH sent");
 
-		_mint(msg.sender, amount);
-		if (msg.value > mintCost) {
-			payable(msg.sender).transfer(msg.value - mintCost);
-		}
+        _mint(msg.sender, amount);
+        if (msg.value > mintCost) {
+            payable(msg.sender).transfer(msg.value - mintCost);
+        }
 
-		if (totalSupply() >= liquidityProvisionThreshold) {
-			liquidityProvisionAndBurn();
-		}
-	}
+        emit TokenMinted(msg.sender, amount);
+    }
 
-	function calculateMintCost(
-		uint256 currentSupply,
-		uint256 mintAmount
-	) public pure returns (uint256) {
-		return ((mintAmount + currentSupply) * CURVE_CONSTANT) / 1e18;
-	}
+    function burn(uint256 amount) public nonReentrant whenNotLocked {
+        uint256 burnProceeds = calculateBurnProceeds(amount);
+        require(burnProceeds <= address(this).balance, "Not enough balance in contract to cover burn proceeds");
 
-	function liquidityProvisionAndBurn() private {
-		uint256 ethBalance = address(this).balance;
-		uint256 tokenBalance = balanceOf(address(this));
-		_approve(address(this), address(uniswapV2Router), tokenBalance);
+        _burn(msg.sender, amount);
+        payable(msg.sender).transfer(burnProceeds);
 
-		(, , uint256 liquidity) = uniswapV2Router.addLiquidityETH{
-			value: ethBalance
-		}(address(this), tokenBalance, 0, 0, treasuryWallet, block.timestamp);
+        emit TokenBurned(msg.sender, amount);
+    }
 
-		emit LiquidityAdded(ethBalance, tokenBalance, liquidity);
+    function calculateMintCost(uint256 currentSupply, uint256 mintAmount) public pure returns (uint256) {
+        return _sumOfPriceToNTokens(currentSupply + mintAmount) - _sumOfPriceToNTokens(currentSupply);
+    }
 
-		uint256 remainingTokens = balanceOf(address(this));
-		if (remainingTokens > 0) {
-			_burn(address(this), remainingTokens);
-			emit TokensBurned(remainingTokens);
-		}
-	}
+    function calculateBurnProceeds(uint256 amount) public view returns (uint256) {
+        uint256 currentSupply = totalSupply();
+        require(amount <= currentSupply, "Burn amount exceeds current supply");
 
-	function setTreasuryWallet(address _treasuryWallet) external onlyOwner {
-		if (_treasuryWallet == address(0)) revert ZeroAddressUsed();
-		treasuryWallet = _treasuryWallet;
-	}
+        return _sumOfPriceToNTokens(currentSupply) - _sumOfPriceToNTokens(currentSupply - amount);
+    }
 
-	receive() external payable {
-		emit ETHReceived(msg.sender, msg.value);
+    function lockLiquidityProvision() external onlyOwner {
+        isLiquidityProvisionLocked = true;
+    }
 
-		if (totalSupply() >= liquidityProvisionThreshold) {
-			liquidityProvisionAndBurn();
-		}
+    // The price of all tokens from number 1 to n.
+    function _sumOfPriceToNTokens(uint256 n) internal pure returns (uint256) {
+        return n * (n + 1) * (2 * n + 1) / 6;
+    }
 
-		if (totalSupply() < liquidityProvisionThreshold) {
-			mint(msg.value, (msg.value * 1e18) / CURVE_CONSTANT);
-		}
-	}
+    // Other functions...
 
-	event LiquidityAdded(
-		uint256 ethAmount,
-		uint256 tokenAmount,
-		uint256 liquidity
-	);
-	event TokensBurned(uint256 amount);
-	event ETHReceived(address from, uint256 amount);
+    event TokenMinted(address indexed to, uint256 amount);
+    event TokenBurned(address indexed from, uint256 amount);
 }
