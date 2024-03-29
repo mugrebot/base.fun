@@ -6,6 +6,31 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
   31337: {
+    DeployBytecode: {
+      address: "0x809d550fca64d94Bd9F66E60752A544199cfAC3D",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "bytes",
+              name: "bytecode",
+              type: "bytes",
+            },
+          ],
+          name: "deployBytecode",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+    },
     DummyUniswapFactory: {
       address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
       abi: [
@@ -632,7 +657,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Token: {
-      address: "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
+      address: "0xB0D4afd8879eD9F52b28595d31B441D079B2Ca07",
       abi: [
         {
           inputs: [
@@ -648,7 +673,12 @@ const deployedContracts = {
             },
             {
               internalType: "address",
-              name: "_uniswapV2RouterAddress",
+              name: "_uniswapV3FactoryAddress",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_dummyWETH",
               type: "address",
             },
           ],
@@ -816,6 +846,31 @@ const deployedContracts = {
             },
           ],
           name: "Approval",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "ethAmount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "tokenAmount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "liquidity",
+              type: "uint256",
+            },
+          ],
+          name: "LiquidityAdded",
           type: "event",
         },
         {
@@ -1063,13 +1118,6 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
-          name: "lockLiquidityProvision",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
           inputs: [
             {
               internalType: "uint256",
@@ -1111,6 +1159,19 @@ const deployedContracts = {
         {
           inputs: [],
           name: "renounceOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_treasuryWallet",
+              type: "address",
+            },
+          ],
+          name: "setTreasuryWallet",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -1222,10 +1283,10 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "uniswapV2Pair",
+          name: "uniswapV3Factory",
           outputs: [
             {
-              internalType: "address",
+              internalType: "contract IUniswapV3Factory",
               name: "",
               type: "address",
             },
@@ -1235,10 +1296,10 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "uniswapV2Router",
+          name: "uniswapV3Pool",
           outputs: [
             {
-              internalType: "contract IUniswapV2Router02",
+              internalType: "contract IUniswapV3Pool",
               name: "",
               type: "address",
             },
