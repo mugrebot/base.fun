@@ -1,9 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-
 contract DeployBytecode {
-    
     // Create contract from bytecode
     function deployBytecode(bytes memory bytecode) public returns (address) {
         address retval;

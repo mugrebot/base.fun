@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * This contract mimics the behavior of WETH by allowing the deposit and withdrawal of Ether in exchange for WETH tokens.
  */
 
-contract DummyWETH is ERC20 {
+contract WETH is ERC20 {
 	//event to log the received ether
 	event Received(address, uint256);
 
