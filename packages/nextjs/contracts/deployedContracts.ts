@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     DeployBytecode: {
-      address: "0x63fea6E447F120B8Faf85B53cdaD8348e645D80E",
+      address: "0x3fdc08D815cc4ED3B7F69Ee246716f2C8bCD6b07",
       abi: [
         {
           inputs: [
@@ -32,7 +32,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Token: {
-      address: "0x38A70c040CA5F5439ad52d0e821063b0EC0B52b6",
+      address: "0x70E5370b8981Abc6e14C91F4AcE823954EFC8eA3",
       abi: [
         {
           inputs: [
@@ -339,7 +339,7 @@ const deployedContracts = {
           inputs: [],
           name: "_wrapETH",
           outputs: [],
-          stateMutability: "payable",
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -473,6 +473,19 @@ const deployedContracts = {
               internalType: "uint8",
               name: "",
               type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "feeTier",
+          outputs: [
+            {
+              internalType: "uint24",
+              name: "",
+              type: "uint24",
             },
           ],
           stateMutability: "view",
@@ -718,7 +731,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     WETH: {
-      address: "0xaC9fCBA56E42d5960f813B9D0387F3D3bC003338",
+      address: "0xb868Cc77A95a65F42611724AF05Aa2d3B6Ec05F2",
       abi: [
         {
           inputs: [],

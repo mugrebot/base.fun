@@ -7,21 +7,20 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IUniswapV3Factory.sol";
 import "./interfaces/IUniswapV3Pool.sol";
-import "./WETH.sol";
-import "hardhat/console.sol"; // Remove this in production
+import "./interfaces/WETH.sol";
+
 
 contract Token is ERC20, Ownable, ReentrancyGuard {
 	using SafeERC20 for IERC20;
 
 	uint256 public liquidityProvisionThreshold = 5 * 1e18; // Adjust as per your requirement
 	bool public isLiquidityProvisionLocked = false;
-	// Example fee tier: 1%
-	uint24 feeTier = 100;
+  	uint24 public feeTier;
 
 	IUniswapV3Factory public uniswapV3Factory;
 	IUniswapV3Pool public uniswapV3Pool;
 	//create a variable to store the weth contract address
-	WETH public weth;
+	IWETH public weth;
 	address public treasuryWallet;
 
 	error InsufficientETHSent();
@@ -37,31 +36,21 @@ contract Token is ERC20, Ownable, ReentrancyGuard {
 		address payable _dummyWETH,
 		uint24 _feeTier // 100 = 1% | 3000 = .3% | 5000 = .05% | 10000 = .01%
 	) ERC20(name_, symbol_) Ownable(msg.sender) {
-		if (_uniswapV3FactoryAddress == address(0)) revert ZeroAddressUsed();
+      if (_uniswapV3FactoryAddress == address(0)) revert ZeroAddressUsed();
 
-		uniswapV3Factory = IUniswapV3Factory(_uniswapV3FactoryAddress);
-		weth = WETH(_dummyWETH);
+        uniswapV3Factory = IUniswapV3Factory(_uniswapV3FactoryAddress);
+        weth = IWETH(_dummyWETH);
 
-		// note: maybe set the fee tier here
-		feeTier = _feeTier;
+        // note: maybe set the fee tier here
+        feeTier = _feeTier;
 
-		// Create the pool if it doesn't exist
-		address pool = uniswapV3Factory.getPool(
-			address(this),
-			_dummyWETH,
-			feeTier
-		);
-		if (pool == address(0)) {
-			pool = uniswapV3Factory.createPool(
-				address(this),
-				_dummyWETH,
-				feeTier
-			);
-			uniswapV3Pool = IUniswapV3Pool(pool);
-			uniswapV3Pool.initialize(1 << 96); // This sets the initial price to 1. Adjust according to your strategy.
-		} else {
-			uniswapV3Pool = IUniswapV3Pool(pool);
-		}
+        // Create and initialize the pool if it doesn't exist
+        createAndInitializePoolIfNecessary(
+            address(this),
+            _dummyWETH,
+            feeTier,
+            1 << 96 // This sets the initial price to 1. Adjust according to your strategy.
+        );
 	}
 
 	modifier whenNotLocked() {
@@ -69,40 +58,56 @@ contract Token is ERC20, Ownable, ReentrancyGuard {
 		_;
 	}
 
-	function mint(uint256 amount) public payable nonReentrant whenNotLocked {
-		
-		uint256 mintCost = calculateMintCost(totalSupply(), amount);
-		require(msg.value >= mintCost, "Insufficient ETH sent");
+	    function createAndInitializePoolIfNecessary(
+        address token0,
+        address token1,
+        uint24 fee,
+        uint160 sqrtPriceX96
+    ) internal {
+        require(token0 < token1);
+        address pool = uniswapV3Factory.getPool(token0, token1, fee);
 
-		uint256 fee = amount / feeTier;
-		_mint(address(this), fee);
-
-		uint256 remainder = amount - fee;
-
-		_mint(msg.sender, remainder);
-		if (msg.value > mintCost) {
-			payable(msg.sender).transfer(msg.value - mintCost);
-			//console log
-			//print this contracts eth balance
-			//console log the uniswapv3 pool address
-
-			console.log("uniswapv3pool address: %s", address(uniswapV3Pool));
-			console.log(address(this).balance);
-			console.log("Minted %s tokens for %s ETH", amount, mintCost);
+        if (pool == address(0)) {
+            pool = uniswapV3Factory.createPool(token0, token1, fee);
+            IUniswapV3Pool(pool).initialize(sqrtPriceX96);
+        } else {
+            (uint160 sqrtPriceX96Existing, , , , , , ) = IUniswapV3Pool(pool).slot0();
+            if (sqrtPriceX96Existing == 0) {
+                IUniswapV3Pool(pool).initialize(sqrtPriceX96);
+            }
         }
+        uniswapV3Pool = IUniswapV3Pool(pool);
+    }
+function mint(uint256 amount) public payable whenNotLocked {
+    // Start of non-reentrant section
+    isLiquidityProvisionLocked = true;
 
-        // If threshold is reached and not locked, provide liquidity
-			if (address(this).balance > liquidityProvisionThreshold) {
-			if (isLiquidityProvisionLocked) revert MintingExceedsThreshold();
-			provideLiquidity();
-			isLiquidityProvisionLocked = true;
-		}
+    uint256 mintCost = calculateMintCost(totalSupply(), amount);
+    require(msg.value >= mintCost, "Insufficient ETH sent");
 
+    uint256 fee = amount / feeTier;
+    _mint(address(this), fee);
 
-        emit TokenMinted(msg.sender, amount);
+    uint256 remainder = amount - fee;
+
+    _mint(msg.sender, remainder);
+    if (msg.value > mintCost) {
+        payable(msg.sender).transfer(msg.value - mintCost);
+
     }
 
-function provideLiquidity() private nonReentrant {
+    // If threshold is reached and not locked, provide liquidity
+    if (address(this).balance > liquidityProvisionThreshold) {
+        provideLiquidity();
+    }
+
+    emit TokenMinted(msg.sender, amount);
+
+    // End of non-reentrant section
+    isLiquidityProvisionLocked = false;
+}
+
+function provideLiquidity() private {
     uint256 ethBalance = address(this).balance;
     if (ethBalance > 0) {
         // Wrap ETH to WETH
@@ -170,39 +175,43 @@ function provideLiquidity() private nonReentrant {
 		//write a function to add liquidity to the uniswap pair
 		//NEED TO WRAP THE ETH IN WETH CONTRACT, YOU CAN SEND THE ETH TO THE WETH CONTRACT ADDRESS AND ITLL RETURN WETH TO YOU
 
-		function _wrapETH() public payable {
-			//send the eth to the weth contract
-			address payable recipient = payable(weth);
-			(bool success, ) = recipient.call{value: address(this).balance}("");
-			require(success, "Transfer failed.");}
+function _wrapETH() public payable {
+    // Cast the IWETH interface to an address, then to address payable
+    address payable wethAddressPayable = payable(address(weth));
+    
+    // Ensure the conversion was successful and the address is not the zero address
+    require(wethAddressPayable != address(0), "Invalid WETH address");
 
-		function testProvideLiquidity() public {
-    	uint256 ethBalance = address(this).balance;
+    // Send the ETH to the WETH contract
+    (bool success, ) = wethAddressPayable.call{value: address(this).balance}("");
+    require(success, "ETH to WETH conversion failed");
+}
 
 
-    // Mint tokens to the pool
-    _mint(address(this), totalSupply());
+function testProvideLiquidity() public {
+    uint256 ethBalance = address(this).balance;
 
     uint256 tokenBalance = balanceOf(address(this));
     uint256 wethBalance = weth.balanceOf(address(this));
-	console.log("weth balance: %s", wethBalance);
-	console.log("token balance: %s", tokenBalance);
+
 
     // Approve spending of WETH and token
     weth.approve(address(uniswapV3Pool), wethBalance);
     this.approve(address(uniswapV3Pool), tokenBalance);
 
     // Define tickLower, tickUpper, and amount according to your strategy
-    (uint256 amount0, uint256 amount1) = uniswapV3Pool.mint(
+    try uniswapV3Pool.mint(
         address(this), // recipient
         -887272, // tickLower, set to minimum tick for full range
         887272, // tickUpper, set to maximum tick for full range
         uint128(tokenBalance), // amount
         abi.encodePacked(address(this)) // data
-    );
-
-    // Additional logic to handle returned values or further actions can be implemented here
-    emit LiquidityAdded(ethBalance, tokenBalance, amount0 + amount1);
+    ) returns (uint256 amount0, uint256 amount1) {
+        // Additional logic to handle returned values or further actions can be implemented here
+        emit LiquidityAdded(ethBalance, tokenBalance, amount0 + amount1);
+    } catch (bytes memory returnData) {
+  
+    }
 }
 	
 

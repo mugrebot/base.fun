@@ -99,7 +99,7 @@ const config: HardhatUserConfig = {
       accounts: [deployerPrivateKey],
     },
     baseSepolia: {
-      url: "https://sepolia.base.org",
+      url: "https://base-sepolia-rpc.publicnode.com",
       accounts: [deployerPrivateKey],
     },
     scrollSepolia: {
