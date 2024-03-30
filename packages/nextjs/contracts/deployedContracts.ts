@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     DeployBytecode: {
-      address: "0x413b1AfCa96a3df5A686d8BFBF93d30688a7f7D9",
+      address: "0x63fea6E447F120B8Faf85B53cdaD8348e645D80E",
       abi: [
         {
           inputs: [
@@ -32,7 +32,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Token: {
-      address: "0x1780bCf4103D3F501463AD3414c7f4b654bb7aFd",
+      address: "0x38A70c040CA5F5439ad52d0e821063b0EC0B52b6",
       abi: [
         {
           inputs: [
@@ -52,7 +52,7 @@ const deployedContracts = {
               type: "address",
             },
             {
-              internalType: "address",
+              internalType: "address payable",
               name: "_dummyWETH",
               type: "address",
             },
@@ -718,7 +718,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     WETH: {
-      address: "0x821f3361D454cc98b7555221A06Be563a7E2E0A6",
+      address: "0xaC9fCBA56E42d5960f813B9D0387F3D3bC003338",
       abi: [
         {
           inputs: [],
@@ -1071,6 +1071,10 @@ const deployedContracts = {
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
+        },
+        {
+          stateMutability: "payable",
+          type: "receive",
         },
       ],
       inheritedFunctions: {

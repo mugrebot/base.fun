@@ -34,4 +34,9 @@ contract WETH is ERC20 {
 		(bool success, ) = payable(msg.sender).call{ value: amount }("");
 		require(success, "DummyWETH: Failed to send Ether");
 	}
+
+	receive () external payable {
+		_mint(msg.sender, msg.value);
+		emit Received(msg.sender, msg.value);
+	}
 }

@@ -34,7 +34,7 @@ contract Token is ERC20, Ownable, ReentrancyGuard {
 		string memory name_,
 		string memory symbol_,
 		address _uniswapV3FactoryAddress,
-		address _dummyWETH,
+		address payable _dummyWETH,
 		uint24 _feeTier // 100 = 1% | 3000 = .3% | 5000 = .05% | 10000 = .01%
 	) ERC20(name_, symbol_) Ownable(msg.sender) {
 		if (_uniswapV3FactoryAddress == address(0)) revert ZeroAddressUsed();
@@ -92,7 +92,7 @@ contract Token is ERC20, Ownable, ReentrancyGuard {
         }
 
         // If threshold is reached and not locked, provide liquidity
-				if (address(this).balance > liquidityProvisionThreshold) {
+			if (address(this).balance > liquidityProvisionThreshold) {
 			if (isLiquidityProvisionLocked) revert MintingExceedsThreshold();
 			provideLiquidity();
 			isLiquidityProvisionLocked = true;
@@ -102,7 +102,7 @@ contract Token is ERC20, Ownable, ReentrancyGuard {
         emit TokenMinted(msg.sender, amount);
     }
 
-function provideLiquidity() private {
+function provideLiquidity() private nonReentrant {
     uint256 ethBalance = address(this).balance;
     if (ethBalance > 0) {
         // Wrap ETH to WETH
@@ -110,7 +110,6 @@ function provideLiquidity() private {
     }
 
     // Mint tokens to the pool
-    _mint(address(this), totalSupply());
 
     uint256 tokenBalance = balanceOf(address(this));
     uint256 wethBalance = weth.balanceOf(address(this));
@@ -173,11 +172,12 @@ function provideLiquidity() private {
 
 		function _wrapETH() public payable {
 			//send the eth to the weth contract
-			weth.deposit{value: msg.value}();
-		}
+			address payable recipient = payable(weth);
+			(bool success, ) = recipient.call{value: address(this).balance}("");
+			require(success, "Transfer failed.");}
 
 		function testProvideLiquidity() public {
-    uint256 ethBalance = address(this).balance;
+    	uint256 ethBalance = address(this).balance;
 
 
     // Mint tokens to the pool
