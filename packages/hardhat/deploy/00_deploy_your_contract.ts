@@ -42,24 +42,65 @@ const deployContracts: DeployFunction = async function (hre: HardhatRuntimeEnvir
   */
 
   // Token contract deployment
+  
   const tokenName = "FARTBEANS";
   const tokenSymbol = "BEANS";
   const WETHaddress = "0x4200000000000000000000000000000000000006";
   const UniswapAddress = "0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24";
+  const positionManager = "0x27F971cb582BF9E50F397e4d29a5C7A34f11faA2";
+  const swapRouter = "0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4";
   const token = await deploy("Token", {
     from: deployer, 
     args: [
       tokenName,
       tokenSymbol,
-      UniswapAddress,
       WETHaddress,
-      3000,
+      UniswapAddress,
+      positionManager,
+      swapRouter,
+
+
     ], // Adjust according to your constructor
     log: true,
     autoMine: true,
   });
   console.log("Token deployed to:", token.address);
 };
+
+
+
+//deploy BKT
+
+/*
+const BKT = await deploy("BasicToken", {
+  from: deployer,
+  log: true,
+  autoMine: true,
+});
+console.log("unipool deployed to:", BKT.address); 
+
+const BEEKT = await deploy("BasicToken2", {
+  from: deployer,
+  log: true,
+  autoMine: true,
+});
+console.log("unipool deployed to:", BEEKT.address);
+
+//deploy BKT
+const unipooldeployer = await deploy("UniswapV3PoolDeployer", {
+  from: deployer,
+  args: ["0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24","0x27F971cb582BF9E50F397e4d29a5C7A34f11faA2","0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4"],
+  log: true,
+  autoMine: true,
+});
+console.log("unipool deployed to:", unipooldeployer.address); 
+};
+*/
+
+
+
+
+
 
 export default deployContracts;
 deployContracts.tags = ["all"];
