@@ -14,6 +14,7 @@ import "./interfaces/WETH.sol";
 
 
 
+
 interface IERC721Receiver {
     function onERC721Received(
         address operator,
@@ -21,6 +22,26 @@ interface IERC721Receiver {
         uint256 tokenId,
         bytes calldata data
     ) external returns (bytes4);
+}
+
+interface IUniswapV3PoolDeployer {
+    function mintAndAddLiquidity(
+        address tokenA,
+        address tokenB,
+        uint256 amountA,
+        uint256 amountB
+    ) external returns  (
+            uint256 tokenId,
+            uint128 liquidity,
+            uint256 amount0,
+            uint256 amount1
+        );
+    function createAndInitializePoolIfNecessary(
+        address tokenA,
+        address tokenB,
+        uint24 fee // Initial sqrt price
+    ) external;
+    function collectFees(uint256 tokenId) external;
 }
 
 
@@ -31,9 +52,11 @@ contract Token is ERC20, Ownable, ReentrancyGuard, IERC721Receiver {
 	bool public isLiquidityProvisionLocked = false;
 
 
-	IUniswapV3Factory public uniswapV3Factory;
+	IUniswapV3Factory public immutable uniswapV3Factory;
     ISwapRouter public immutable swapRouter;
     INonfungiblePositionManager public immutable positionManager;
+    IUniswapV3PoolDeployer public immutable unideployer;
+
     // Define constants for pool parameters,
     int24 private constant MIN_TICK = -887272;
     int24 private constant MAX_TICK = -MIN_TICK;
@@ -56,13 +79,17 @@ contract Token is ERC20, Ownable, ReentrancyGuard, IERC721Receiver {
 		address payable _dummyWETH,
         address _uniswapV3Factory,
         address _positionManager,
-        address _swapRouter
+        address _swapRouter,
+        address _unideployer
 	) ERC20(name_, symbol_) Ownable(msg.sender) {
 
         uniswapV3Factory = IUniswapV3Factory(_uniswapV3Factory);
         positionManager = INonfungiblePositionManager(_positionManager);
         swapRouter = ISwapRouter(_swapRouter);
         weth = IWETH(_dummyWETH);
+        unideployer = IUniswapV3PoolDeployer(_unideployer);
+
+        createAndInitializePoolIfNecessary(address(this), address(weth), POOL_FEE);
 	}
 
 	modifier whenNotLocked() {
@@ -80,65 +107,18 @@ contract Token is ERC20, Ownable, ReentrancyGuard, IERC721Receiver {
         return IERC721Receiver.onERC721Received.selector;
     }
 
+    //approve external contract to spend this contract's tokens in both tokenA and tokenB
+    function approveContract() external onlyOwner {
+        IERC20(address(this)).approve(address(unideployer), 10000000000000000000e18);
+
+        IERC20(address(weth)).approve(address(unideployer), 1000000000000e18);
+
+    }
+
 //function to create uniswap pool and add lp
-   function mintAndAddLiquidity(
-        address tokenA,
-        address tokenB,
-        uint256 amountA,
-        uint256 amountB
-    ) public returns  (
-            uint256 tokenId,
-            uint128 liquidity,
-            uint256 amount0,
-            uint256 amount1
-        ) {
-
-
-
-        // check eth balance
-        if (address(this).balance > 0) {
-        // Wrap ETH to WETH
-        _wrapETH();
-    }
-        // Ensure the pool is created and initialized
-        createAndInitializePoolIfNecessary(tokenA, tokenB, POOL_FEE);
-
-
-        // Transfer tokens to this contract
-IERC20(tokenA).transfer(address(positionManager), amountA);
-IERC20(tokenB).transfer(address(positionManager), amountB);
-
-
-        // Mint a new position in the pool
-        INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
-            token0: tokenA,
-            token1: tokenB,
-            fee: POOL_FEE,
-            tickLower: (MIN_TICK/TICK_SPACING)*TICK_SPACING,
-            tickUpper: (MAX_TICK/TICK_SPACING)*TICK_SPACING,
-            amount0Desired: amountA,
-            amount1Desired: amountB,
-            amount0Min: 0, // Slippage protection
-            amount1Min: 0, // Slippage protection
-            recipient: 0x0000000000000000000000000000000000000000,
-            deadline: block.timestamp
-        });
-
-        // Mint the position and get the tokenId
-        (tokenId, liquidity, amount0, amount1) = positionManager.mint(params);
- 
-
-        // Refund any unused tokens
-        refundUnusedTokens(tokenA, msg.sender, amountA);
-        refundUnusedTokens(tokenB, msg.sender, amountB);
-    }
-
-        function refundUnusedTokens(address token, address recipient, uint256 amount) private {
-        uint256 contractBalance = IERC20(token).balanceOf(address(this));
-        if (contractBalance < amount) {
-            IERC20(token).transfer(recipient, contractBalance);
-        }
-    }
+function sendIT() public {
+    unideployer.mintAndAddLiquidity(address(this), address(weth), 1e18, 0.001e18);
+}
 
         function createAndInitializePoolIfNecessary(
         address tokenA,
@@ -176,7 +156,7 @@ function mint(uint256 amount) public payable whenNotLocked {
 
     // If threshold is reached and not locked, provide liquidity
     if (address(this).balance > liquidityProvisionThreshold) {
-        mintAndAddLiquidity(address(this), address(weth), balanceOf(address(this)), weth.balanceOf(address(this)));
+        sendIT();
     }
 
     emit TokenMinted(msg.sender, amount);
@@ -235,6 +215,16 @@ function _wrapETH() public payable {
     (bool success, ) = wethAddressPayable.call{value: address(this).balance}("");
     require(success, "ETH to WETH conversion failed");
 }
+
+    function collectFees(uint256 tokenId) external {
+        INonfungiblePositionManager.CollectParams memory params = INonfungiblePositionManager.CollectParams({
+            tokenId: tokenId,
+            recipient: msg.sender,
+            amount0Max: type(uint128).max,
+            amount1Max: type(uint128).max
+        });
+        positionManager.collect(params);
+    }
 
 
     

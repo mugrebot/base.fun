@@ -979,7 +979,7 @@ const deployedContracts = {
   },
   84532: {
     Token: {
-      address: "0x0761931BcdF537289fC8FAc7817C43657214fCb1",
+      address: "0x4dD5142a7Fd05bc99415D4B167B38d9D95C8E06c",
       abi: [
         {
           inputs: [
@@ -1011,6 +1011,11 @@ const deployedContracts = {
             {
               internalType: "address",
               name: "_swapRouter",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_unideployer",
               type: "address",
             },
           ],
@@ -1343,6 +1348,13 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [],
+          name: "approveContract",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
           inputs: [
             {
               internalType: "address",
@@ -1418,6 +1430,19 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "tokenId",
+              type: "uint256",
+            },
+          ],
+          name: "collectFees",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
           inputs: [],
           name: "decimals",
           outputs: [
@@ -1467,55 +1492,6 @@ const deployedContracts = {
           name: "mint",
           outputs: [],
           stateMutability: "payable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "tokenA",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "tokenB",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "amountA",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "amountB",
-              type: "uint256",
-            },
-          ],
-          name: "mintAndAddLiquidity",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "tokenId",
-              type: "uint256",
-            },
-            {
-              internalType: "uint128",
-              name: "liquidity",
-              type: "uint128",
-            },
-            {
-              internalType: "uint256",
-              name: "amount0",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "amount1",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -1594,6 +1570,13 @@ const deployedContracts = {
         {
           inputs: [],
           name: "renounceOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "sendIT",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -1731,6 +1714,19 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "unideployer",
+          outputs: [
+            {
+              internalType: "contract IUniswapV3PoolDeployer",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
           name: "uniswapV3Factory",
           outputs: [
             {
@@ -1748,6 +1744,168 @@ const deployedContracts = {
           outputs: [
             {
               internalType: "contract IWETH",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+    },
+    UniswapV3PoolDeployer: {
+      address: "0xCf4ccA8e4211CA2779E7916ffFb33f8AD20dE283",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_uniswapV3Factory",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_positionManager",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_swapRouter",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "tokenId",
+              type: "uint256",
+            },
+          ],
+          name: "collectFees",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "tokenA",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "tokenB",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amountA",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amountB",
+              type: "uint256",
+            },
+          ],
+          name: "mintAndAddLiquidity",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "tokenId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint128",
+              name: "liquidity",
+              type: "uint128",
+            },
+            {
+              internalType: "uint256",
+              name: "amount0",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amount1",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "bytes",
+              name: "",
+              type: "bytes",
+            },
+          ],
+          name: "onERC721Received",
+          outputs: [
+            {
+              internalType: "bytes4",
+              name: "",
+              type: "bytes4",
+            },
+          ],
+          stateMutability: "pure",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "positionManager",
+          outputs: [
+            {
+              internalType: "contract INonfungiblePositionManager",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "swapRouter",
+          outputs: [
+            {
+              internalType: "contract ISwapRouter",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "uniswapV3Factory",
+          outputs: [
+            {
+              internalType: "contract IUniswapV3Factory",
               name: "",
               type: "address",
             },
