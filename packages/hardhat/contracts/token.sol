@@ -7,13 +7,77 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../node_modules/@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "../node_modules/@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-import "../node_modules/@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
-import "../node_modules/@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-import "./interfaces/WETH.sol";
 
 
+interface IWETH is IERC20 {
+    function deposit() external payable;
+    function withdraw(uint256 amount) external;
+}
+interface INonfungiblePositionManager {
+    struct MintParams {
+        address token0;
+        address token1;
+        uint24 fee;
+        int24 tickLower;
+        int24 tickUpper;
+        uint256 amount0Desired;
+        uint256 amount1Desired;
+        uint256 amount0Min;
+        uint256 amount1Min;
+        address recipient;
+        uint256 deadline;
+    }
 
 
+    function mint(MintParams calldata params)
+        external
+        payable
+        returns (
+            uint256 tokenId,
+            uint128 liquidity,
+            uint256 amount0,
+            uint256 amount1
+        );
+
+    struct IncreaseLiquidityParams {
+        uint256 tokenId;
+        uint256 amount0Desired;
+        uint256 amount1Desired;
+        uint256 amount0Min;
+        uint256 amount1Min;
+        uint256 deadline;
+    }
+
+    function increaseLiquidity(IncreaseLiquidityParams calldata params)
+        external
+        payable
+        returns (uint128 liquidity, uint256 amount0, uint256 amount1);
+
+    struct DecreaseLiquidityParams {
+        uint256 tokenId;
+        uint128 liquidity;
+        uint256 amount0Min;
+        uint256 amount1Min;
+        uint256 deadline;
+    }
+
+    function decreaseLiquidity(DecreaseLiquidityParams calldata params)
+        external
+        payable
+        returns (uint256 amount0, uint256 amount1);
+
+    struct CollectParams {
+        uint256 tokenId;
+        address recipient;
+        uint128 amount0Max;
+        uint128 amount1Max;
+    }
+
+    function collect(CollectParams calldata params)
+        external
+        payable
+        returns (uint256 amount0, uint256 amount1);
+}
 
 interface IERC721Receiver {
     function onERC721Received(
@@ -24,54 +88,26 @@ interface IERC721Receiver {
     ) external returns (bytes4);
 }
 
-interface IUniswapV3PoolDeployer {
-    function mintAndAddLiquidity(
-        address tokenA,
-        address tokenB,
-        uint256 amountA,
-        uint256 amountB
-    ) external returns  (
-            uint256 tokenId,
-            uint128 liquidity,
-            uint256 amount0,
-            uint256 amount1
-        );
-    function createAndInitializePoolIfNecessary(
-        address tokenA,
-        address tokenB,
-        uint24 fee // Initial sqrt price
-    ) external;
-    function collectFees(uint256 tokenId) external;
-}
 
-
-contract Token is ERC20, Ownable, ReentrancyGuard, IERC721Receiver {
+contract Token is ERC20, Ownable, IERC721Receiver {
 	using SafeERC20 for IERC20;
-
-	uint256 public liquidityProvisionThreshold = 0.5 * 1e18; // Adjust as per your requirement
+	uint256 public liquidityProvisionThreshold = 10 ether;
 	bool public isLiquidityProvisionLocked = false;
-
-
-	IUniswapV3Factory public immutable uniswapV3Factory;
-    ISwapRouter public immutable swapRouter;
-    INonfungiblePositionManager public immutable positionManager;
-    IUniswapV3PoolDeployer public immutable unideployer;
-
+	IUniswapV3Factory public uniswapV3Factory;
+    INonfungiblePositionManager public positionManager;
     // Define constants for pool parameters,
     int24 private constant MIN_TICK = -887272;
     int24 private constant MAX_TICK = -MIN_TICK;
     int24 private constant TICK_SPACING = 200;
     uint24 private constant POOL_FEE = 10000; // Pool fee in hundredths of a bip, i.e., 3000 represents 0.3%
-
 	//create a variable to store the weth contract address
 	IWETH public weth;
 	address public treasuryWallet;
-
 	error InsufficientETHSent();
-	error MintingExceedsThreshold();
-	error ZeroAddressUsed();
+	error ExceedsThreshold();
 	error UnauthorizedAccess();
 	error LiquidityProvisionLocked();
+    error NotEnoughMinted();
 
 	constructor(
 		string memory name_,
@@ -79,24 +115,25 @@ contract Token is ERC20, Ownable, ReentrancyGuard, IERC721Receiver {
 		address payable _dummyWETH,
         address _uniswapV3Factory,
         address _positionManager,
-        address _swapRouter,
-        address _unideployer
+        address _treasuryWallet
 	) ERC20(name_, symbol_) Ownable(msg.sender) {
-
+        
         uniswapV3Factory = IUniswapV3Factory(_uniswapV3Factory);
         positionManager = INonfungiblePositionManager(_positionManager);
-        swapRouter = ISwapRouter(_swapRouter);
         weth = IWETH(_dummyWETH);
-        unideployer = IUniswapV3PoolDeployer(_unideployer);
-
-        createAndInitializePoolIfNecessary(address(this), address(weth), POOL_FEE);
+        createAndInitializePoolIfNecessary(address(weth), address(this), POOL_FEE);
+        address pool = uniswapV3Factory.getPool(address(weth), address(this), POOL_FEE);
+        treasuryWallet = _treasuryWallet;
+        _mint(0x000000000000000000000000000000000000dEaD, 1e18);
 	}
-
 	modifier whenNotLocked() {
 		if (isLiquidityProvisionLocked) revert LiquidityProvisionLocked();
 		_;
 	}
-
+    //function to get pool address given, tokenA, tokenB and fee
+    function getPoolAddress(address tokenA, address tokenB, uint24 fee) public view returns (address) {
+        return uniswapV3Factory.getPool(tokenA, tokenB, fee);
+    }
     // Allows the contract to receive ERC721 tokens, necessary for Uniswap V3 NFTs
     function onERC721Received(
         address,
@@ -106,25 +143,12 @@ contract Token is ERC20, Ownable, ReentrancyGuard, IERC721Receiver {
     ) external pure override returns (bytes4) {
         return IERC721Receiver.onERC721Received.selector;
     }
-
-    //approve external contract to spend this contract's tokens in both tokenA and tokenB
-    function approveContract() external onlyOwner {
-        IERC20(address(this)).approve(address(unideployer), 10000000000000000000e18);
-
-        IERC20(address(weth)).approve(address(unideployer), 1000000000000e18);
-
-    }
-
 //function to create uniswap pool and add lp
-function sendIT() public {
-    unideployer.mintAndAddLiquidity(address(this), address(weth), 1e18, 0.001e18);
-}
-
         function createAndInitializePoolIfNecessary(
         address tokenA,
         address tokenB,
         uint24 fee // Initial sqrt price
-    ) private {
+    ) public {
         uint160 sqrtPriceX96 = 1 << 96;
         address pool = uniswapV3Factory.getPool(tokenA, tokenB, fee);
         if (pool == address(0)) {
@@ -133,39 +157,61 @@ function sendIT() public {
             IUniswapV3Pool(pool).initialize(sqrtPriceX96);
         }
     }
-
+    function mintNewPosition(uint256 amount0ToAdd, uint256 amount1ToAdd, address _token)
+        external payable
+        returns (
+            uint256 tokenId,
+            uint128 liquidity,
+            uint256 amount0,
+            uint256 amount1
+        )
+    {
+        IERC20(address(this)).approve(address(positionManager), amount0ToAdd);
+        IERC20(address(weth)).approve(address(positionManager), amount1ToAdd);
+        INonfungiblePositionManager.MintParams memory params =
+        INonfungiblePositionManager.MintParams({
+            token0: address(weth),
+            token1: address(this),
+            fee: POOL_FEE,
+            tickLower: (MIN_TICK / TICK_SPACING) * TICK_SPACING,
+            tickUpper: (MAX_TICK / TICK_SPACING) * TICK_SPACING,
+            amount0Desired: amount0ToAdd,
+            amount1Desired: amount1ToAdd,
+            amount0Min: 0,
+            amount1Min: 0,
+            recipient: 0x000000000000000000000000000000000000dEaD,
+            deadline: block.timestamp
+        });
+        (tokenId, liquidity, amount0, amount1) = positionManager.mint(params);
+    }
 function mint(uint256 amount) public payable whenNotLocked {
-    // Start of non-reentrant section
-    isLiquidityProvisionLocked = true;
-
+    //needs to mint atleast >= 1 token
+    if (amount < 1) revert NotEnoughMinted();
     uint256 mintCost = calculateMintCost(totalSupply(), amount);
-    require(msg.value >= mintCost, "Insufficient ETH sent");
-
+    if (msg.value <= mintCost) revert InsufficientETHSent();
  //this is to supply liquidity to the pool 
  //fee will be 15% of the mint amount
     uint256 fee = amount * 15 / 100;
     _mint(address(this), fee);
-
     uint256 remainder = amount - fee;
-
     _mint(msg.sender, remainder);
     if (msg.value > mintCost) {
         payable(msg.sender).transfer(msg.value - mintCost);
-
     }
-
     // If threshold is reached and not locked, provide liquidity
-    if (address(this).balance > liquidityProvisionThreshold) {
-        sendIT();
+    if (isLiquidityProvisionLocked = false && address(this).balance >= liquidityProvisionThreshold) {
+        isLiquidityProvisionLocked = true;
+        // Wrap the ETH to WETH
+        _wrapETH();
+        // Add liquidity to the pool
+        this.mintNewPosition(IERC20(address(weth)).balanceOf(address(this)), IERC20(address(weth)).balanceOf(address(this)), address(weth));
     }
 
     emit TokenMinted(msg.sender, amount);
 
-    // End of non-reentrant section
-    isLiquidityProvisionLocked = false;
 }
 
-    function burn(uint256 amount) public nonReentrant whenNotLocked {
+    function burn(uint256 amount) public whenNotLocked {
         uint256 burnProceeds = calculateBurnProceeds(amount);
         if (burnProceeds > address(this).balance) revert InsufficientETHSent();
 
@@ -175,21 +221,22 @@ function mint(uint256 amount) public payable whenNotLocked {
             emit TokenBurned(msg.sender, amount);
         }
     
-        function calculateMintCost(uint256 currentSupply, uint256 mintAmount) public pure returns (uint256) {
-            return ((_sumOfPriceToNTokens(currentSupply + mintAmount) - _sumOfPriceToNTokens(currentSupply)));
+        function calculateMintCost(uint256 currentSupply, uint256 mintAmount) public view returns (uint256) {
+            if (currentSupply == 0) {
+            return ((_sumOfPriceToNTokens(currentSupply + mintAmount)));
+            }
+            else {
+                return ((_sumOfPriceToNTokens(currentSupply + mintAmount)) - (_sumOfPriceToNTokens(currentSupply)));
+            }
         }
     
         function calculateBurnProceeds(uint256 amount) public view returns (uint256) {
             uint256 currentSupply = totalSupply();
-            require(amount <= currentSupply, "Burn amount exceeds current supply");
+            if (amount >= currentSupply) revert ExceedsThreshold();
     
             return _sumOfPriceToNTokens(currentSupply) - _sumOfPriceToNTokens(currentSupply - amount);
         }
-    
-        function setTreasuryWallet(address _treasuryWallet) external onlyOwner {
-            if (_treasuryWallet == address(0)) revert ZeroAddressUsed();
-            treasuryWallet = _treasuryWallet;
-        }
+
     
         // The price of all tokens from number 1 to n.
         // This function was previously used in your bonding curve example,
@@ -198,40 +245,25 @@ function mint(uint256 amount) public payable whenNotLocked {
             return (n / 1e18)*((n/1e18) + 1) * (2 * (n/1e18) + 1) / 6;
         }
 
-		//write a function to create a uniswap pair 
 
+        function _wrapETH() public payable {
+            //check if liquidity locked is true
+            if (!isLiquidityProvisionLocked) revert LiquidityProvisionLocked();
 
-		//write a function to add liquidity to the uniswap pair
-		//NEED TO WRAP THE ETH IN WETH CONTRACT, YOU CAN SEND THE ETH TO THE WETH CONTRACT ADDRESS AND ITLL RETURN WETH TO YOU
+            address payable wethAddressPayable = payable(address(weth));
+            // Ensure the conversion was successful and the address is not the zero address
+            //deposit 5% of the eth to a treasury wallet, 1% to the owner of the contract
+            uint256 treasuryAmount = address(this).balance * 5 / 100;
+            payable(treasuryWallet).transfer(treasuryAmount);
+            uint256 ownerAmount = address(this).balance * 1 / 100;
+            payable(owner()).transfer(ownerAmount);
+            // Send the ETH to the WETH contract
+            (bool success, ) = wethAddressPayable.call{value: address(this).balance}("");
+            if (!success) revert InsufficientETHSent();
+            }
 
-function _wrapETH() public payable {
-    // Cast the IWETH interface to an address, then to address payable
-    address payable wethAddressPayable = payable(address(weth));
-    
-    // Ensure the conversion was successful and the address is not the zero address
-    require(wethAddressPayable != address(0), "Invalid WETH address");
-
-    // Send the ETH to the WETH contract
-    (bool success, ) = wethAddressPayable.call{value: address(this).balance}("");
-    require(success, "ETH to WETH conversion failed");
-}
-
-    function collectFees(uint256 tokenId) external {
-        INonfungiblePositionManager.CollectParams memory params = INonfungiblePositionManager.CollectParams({
-            tokenId: tokenId,
-            recipient: msg.sender,
-            amount0Max: type(uint128).max,
-            amount1Max: type(uint128).max
-        });
-        positionManager.collect(params);
-    }
-
-
-    
-        // Additional utility functions or modifications can be added here
-    
         event TokenMinted(address indexed to, uint256 amount);
         event TokenBurned(address indexed from, uint256 amount);
-        event LiquidityAdded(uint256 ethAmount, uint256 tokenAmount, uint256 liquidity);
+        event LiquidityAdded(uint256 ethAmount, uint256 tokenAmount, address _pool);
     }
     

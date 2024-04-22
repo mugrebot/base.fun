@@ -1,6 +1,5 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity >=0.5.0;
-
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
 import '../pool/IUniswapV3PoolImmutables.sol';
 import '../pool/IUniswapV3PoolState.sol';
 import '../pool/IUniswapV3PoolDerivedState.sol';

@@ -6,11 +6,181 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
   31337: {
-    BasicToken: {
-      address: "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+    UniswapV3PoolDeployer: {
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       abi: [
         {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_uniswapV3Factory",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_positionManager",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_swapRouter",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "tokenId",
+              type: "uint256",
+            },
+          ],
+          name: "collectFees",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "tokenA",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "tokenB",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amountA",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amountB",
+              type: "uint256",
+            },
+          ],
+          name: "mintAndAddLiquidity",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "tokenId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint128",
+              name: "liquidity",
+              type: "uint128",
+            },
+            {
+              internalType: "uint256",
+              name: "amount0",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amount1",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "bytes",
+              name: "",
+              type: "bytes",
+            },
+          ],
+          name: "onERC721Received",
+          outputs: [
+            {
+              internalType: "bytes4",
+              name: "",
+              type: "bytes4",
+            },
+          ],
+          stateMutability: "pure",
+          type: "function",
+        },
+        {
           inputs: [],
+          name: "positionManager",
+          outputs: [
+            {
+              internalType: "contract INonfungiblePositionManager",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "swapRouter",
+          outputs: [
+            {
+              internalType: "contract ISwapRouter",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "uniswapV3Factory",
+          outputs: [
+            {
+              internalType: "contract IUniswapV3Factory",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+    },
+  },
+  84532: {
+    BasicToken: {
+      address: "0x37643a285974b1C6E583eC5d805cd39f41ECE475",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_contract",
+              type: "address",
+            },
+          ],
           stateMutability: "nonpayable",
           type: "constructor",
         },
@@ -400,10 +570,16 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     BasicToken2: {
-      address: "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+      address: "0x9c8c30052177585c698D0cc0A84A31207A362D42",
       abi: [
         {
-          inputs: [],
+          inputs: [
+            {
+              internalType: "address",
+              name: "_contract",
+              type: "address",
+            },
+          ],
           stateMutability: "nonpayable",
           type: "constructor",
         },
@@ -792,194 +968,8 @@ const deployedContracts = {
       ],
       inheritedFunctions: {},
     },
-    UniswapV3PoolDeployer: {
-      address: "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
-      abi: [
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_uniswapV3Factory",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "_positionManager",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "_swapRouter",
-              type: "address",
-            },
-          ],
-          stateMutability: "nonpayable",
-          type: "constructor",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "target",
-              type: "address",
-            },
-          ],
-          name: "AddressEmptyCode",
-          type: "error",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "account",
-              type: "address",
-            },
-          ],
-          name: "AddressInsufficientBalance",
-          type: "error",
-        },
-        {
-          inputs: [],
-          name: "FailedInnerCall",
-          type: "error",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-          ],
-          name: "SafeERC20FailedOperation",
-          type: "error",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "tokenId",
-              type: "uint256",
-            },
-          ],
-          name: "collectFees",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "tokenA",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "tokenB",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "amountA",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "amountB",
-              type: "uint256",
-            },
-            {
-              internalType: "uint160",
-              name: "sqrtPriceX96",
-              type: "uint160",
-            },
-          ],
-          name: "mintAndAddLiquidity",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-            {
-              internalType: "bytes",
-              name: "",
-              type: "bytes",
-            },
-          ],
-          name: "onERC721Received",
-          outputs: [
-            {
-              internalType: "bytes4",
-              name: "",
-              type: "bytes4",
-            },
-          ],
-          stateMutability: "pure",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "positionManager",
-          outputs: [
-            {
-              internalType: "contract INonfungiblePositionManager",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "swapRouter",
-          outputs: [
-            {
-              internalType: "contract ISwapRouter",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "uniswapV3Factory",
-          outputs: [
-            {
-              internalType: "contract IUniswapV3Factory",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-      ],
-      inheritedFunctions: {},
-    },
-  },
-  84532: {
     Token: {
-      address: "0x4dD5142a7Fd05bc99415D4B167B38d9D95C8E06c",
+      address: "0xBAd03f29961695a6b37Da2ed563CC57C1aCE57F0",
       abi: [
         {
           inputs: [
@@ -1011,11 +1001,6 @@ const deployedContracts = {
             {
               internalType: "address",
               name: "_swapRouter",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "_unideployer",
               type: "address",
             },
           ],
@@ -1294,6 +1279,51 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "MAX_TOKENS",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MIN_MINT_AMOUNT",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "numTokens",
+              type: "uint256",
+            },
+          ],
+          name: "_sumOfPriceToNTokens",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
           name: "_wrapETH",
           outputs: [],
           stateMutability: "payable",
@@ -1348,7 +1378,18 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
+          inputs: [
+            {
+              internalType: "address",
+              name: "_choose",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_token",
+              type: "address",
+            },
+          ],
           name: "approveContract",
           outputs: [],
           stateMutability: "nonpayable",
@@ -1426,7 +1467,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          stateMutability: "pure",
+          stateMutability: "view",
           type: "function",
         },
         {
@@ -1443,6 +1484,29 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [
+            {
+              internalType: "address",
+              name: "tokenA",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "tokenB",
+              type: "address",
+            },
+            {
+              internalType: "uint24",
+              name: "fee",
+              type: "uint24",
+            },
+          ],
+          name: "createAndInitializePoolIfNecessary",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
           inputs: [],
           name: "decimals",
           outputs: [
@@ -1450,6 +1514,71 @@ const deployedContracts = {
               internalType: "uint8",
               name: "",
               type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "tokenA",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "tokenB",
+              type: "address",
+            },
+            {
+              internalType: "uint24",
+              name: "fee",
+              type: "uint24",
+            },
+          ],
+          name: "getPoolAddress",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_pool",
+              type: "address",
+            },
+          ],
+          name: "getSlot0",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint160",
+                  name: "sqrtPriceX96",
+                  type: "uint160",
+                },
+                {
+                  internalType: "int24",
+                  name: "tick",
+                  type: "int24",
+                },
+                {
+                  internalType: "bool",
+                  name: "unlocked",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct Slot0",
+              name: "",
+              type: "tuple",
             },
           ],
           stateMutability: "view",
@@ -1491,6 +1620,50 @@ const deployedContracts = {
           ],
           name: "mint",
           outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "amount0ToAdd",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amount1ToAdd",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "_token",
+              type: "address",
+            },
+          ],
+          name: "mintNewPosition",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "tokenId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint128",
+              name: "liquidity",
+              type: "uint128",
+            },
+            {
+              internalType: "uint256",
+              name: "amount0",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amount1",
+              type: "uint256",
+            },
+          ],
           stateMutability: "payable",
           type: "function",
         },
@@ -1570,13 +1743,6 @@ const deployedContracts = {
         {
           inputs: [],
           name: "renounceOwnership",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "sendIT",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -1755,7 +1921,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     UniswapV3PoolDeployer: {
-      address: "0xCf4ccA8e4211CA2779E7916ffFb33f8AD20dE283",
+      address: "0x6b54f5db9DF967F64A7FC01E78852D61053D76B1",
       abi: [
         {
           inputs: [
