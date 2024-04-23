@@ -969,7 +969,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Token: {
-      address: "0xBAd03f29961695a6b37Da2ed563CC57C1aCE57F0",
+      address: "0xB5DF455362DbC29A293385125924e337046c788D",
       abi: [
         {
           inputs: [
@@ -1000,7 +1000,7 @@ const deployedContracts = {
             },
             {
               internalType: "address",
-              name: "_swapRouter",
+              name: "_treasuryWallet",
               type: "address",
             },
           ],
@@ -1095,6 +1095,11 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "ExceedsThreshold",
+          type: "error",
+        },
+        {
+          inputs: [],
           name: "InsufficientETHSent",
           type: "error",
         },
@@ -1105,7 +1110,7 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "MintingExceedsThreshold",
+          name: "NotEnoughMinted",
           type: "error",
         },
         {
@@ -1132,17 +1137,7 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "ReentrancyGuardReentrantCall",
-          type: "error",
-        },
-        {
-          inputs: [],
           name: "UnauthorizedAccess",
-          type: "error",
-        },
-        {
-          inputs: [],
-          name: "ZeroAddressUsed",
           type: "error",
         },
         {
@@ -1187,9 +1182,9 @@ const deployedContracts = {
             },
             {
               indexed: false,
-              internalType: "uint256",
-              name: "liquidity",
-              type: "uint256",
+              internalType: "address",
+              name: "_pool",
+              type: "address",
             },
           ],
           name: "LiquidityAdded",
@@ -1279,51 +1274,6 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "MAX_TOKENS",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "MIN_MINT_AMOUNT",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "numTokens",
-              type: "uint256",
-            },
-          ],
-          name: "_sumOfPriceToNTokens",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
           name: "_wrapETH",
           outputs: [],
           stateMutability: "payable",
@@ -1374,24 +1324,6 @@ const deployedContracts = {
               type: "bool",
             },
           ],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_choose",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "_token",
-              type: "address",
-            },
-          ],
-          name: "approveContract",
-          outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
@@ -1473,19 +1405,6 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "uint256",
-              name: "tokenId",
-              type: "uint256",
-            },
-          ],
-          name: "collectFees",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
               internalType: "address",
               name: "tokenA",
               type: "address",
@@ -1543,42 +1462,6 @@ const deployedContracts = {
               internalType: "address",
               name: "",
               type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_pool",
-              type: "address",
-            },
-          ],
-          name: "getSlot0",
-          outputs: [
-            {
-              components: [
-                {
-                  internalType: "uint160",
-                  name: "sqrtPriceX96",
-                  type: "uint160",
-                },
-                {
-                  internalType: "int24",
-                  name: "tick",
-                  type: "int24",
-                },
-                {
-                  internalType: "bool",
-                  name: "unlocked",
-                  type: "bool",
-                },
-              ],
-              internalType: "struct Slot0",
-              name: "",
-              type: "tuple",
             },
           ],
           stateMutability: "view",
@@ -1748,32 +1631,6 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_treasuryWallet",
-              type: "address",
-            },
-          ],
-          name: "setTreasuryWallet",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "swapRouter",
-          outputs: [
-            {
-              internalType: "contract ISwapRouter",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
           inputs: [],
           name: "symbol",
           outputs: [
@@ -1880,19 +1737,6 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "unideployer",
-          outputs: [
-            {
-              internalType: "contract IUniswapV3PoolDeployer",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
           name: "uniswapV3Factory",
           outputs: [
             {
@@ -1919,6 +1763,281 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
+    },
+    TokenFactory: {
+      address: "0xa1C150e619f7F6Eda8573Fa9316252ae52758DAC",
+      abi: [
+        {
+          inputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+          ],
+          name: "OwnableInvalidOwner",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "OwnableUnauthorizedAccount",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "TokenNameSymbolExists",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "symbol",
+              type: "string",
+            },
+          ],
+          name: "TokenCreated",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "UniswapAddress",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "WETHaddress",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "symbol",
+              type: "string",
+            },
+            {
+              internalType: "bytes32",
+              name: "salt",
+              type: "bytes32",
+            },
+          ],
+          name: "createToken",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "symbol",
+              type: "string",
+            },
+          ],
+          name: "getCreationCode",
+          outputs: [
+            {
+              internalType: "bytes",
+              name: "creationCode",
+              type: "bytes",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "positionManager",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "renounceOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_treasuryWallet",
+              type: "address",
+            },
+          ],
+          name: "setTreasuryWallet",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          name: "tokenNames",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          name: "tokenSymbols",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "treasuryWallet",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {
+        owner: "@openzeppelin/contracts/access/Ownable.sol",
+        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+      },
     },
     UniswapV3PoolDeployer: {
       address: "0x6b54f5db9DF967F64A7FC01E78852D61053D76B1",

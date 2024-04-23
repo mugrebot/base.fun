@@ -54,6 +54,7 @@ const deployContracts: DeployFunction = async function (hre: HardhatRuntimeEnvir
   console.log("unipool deployed to:", unipooldeployer.address); 
   */
   
+  /*
   const tokenName = "FARTBEANS2";
   const tokenSymbol = "BEANS2";
   const WETHaddress = "0x4200000000000000000000000000000000000006";
@@ -77,7 +78,15 @@ const deployContracts: DeployFunction = async function (hre: HardhatRuntimeEnvir
   });
   console.log("Token deployed to:", token.address);
 
-  
+  */
+ 
+  const tokenDeployer = await deploy("TokenFactory", {
+    from: deployer,
+    args: [],
+    log: true,
+    autoMine: true,
+  });
+  console.log("factory deployed to:", tokenDeployer.address); 
 
   /*
 
