@@ -27,3 +27,37 @@ dataSources:
         - event: TokenCreated(address,address,string,string,uint256)
           handler: handleTokenCreated
       file: ./src/token-factory.ts
+templates:
+  - kind: ethereum
+    name: Token
+    network: base-sepolia
+    source:
+      abi: Token
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - LiquidityAdded
+        - TokenOwnershipTransferred
+        - TokenBurned
+        - TokenMinted
+        - Transfer
+      abis:
+        - name: Token
+          file: ./abis/Token.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+        - event: LiquidityAdded(uint256,uint256,address)
+          handler: handleLiquidityAdded
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: TokenBurned(indexed address,uint256)
+          handler: handleTokenBurned
+        - event: TokenMinted(indexed address,uint256)
+          handler: handleTokenMinted
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/token.ts

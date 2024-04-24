@@ -3,6 +3,7 @@ import {
   TokenCreated as TokenCreatedEvent
 } from "../generated/TokenFactory/TokenFactory"
 import { OwnershipTransferred, TokenCreated } from "../generated/schema"
+import { Token } from "../generated/templates"
 
 export function handleOwnershipTransferred(
   event: OwnershipTransferredEvent
@@ -35,4 +36,6 @@ export function handleTokenCreated(event: TokenCreatedEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
+
+  Token.create(event.params.tokenAddress)
 }
