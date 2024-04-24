@@ -60,6 +60,7 @@ contract Token is ERC20, Ownable, IERC721Receiver {
     int24 private constant MAX_TICK = -MIN_TICK;
     int24 private constant TICK_SPACING = 200;
     uint24 private constant POOL_FEE = 10000; // Pool fee in hundredths of a bip, i.e., 3000 represents 0.3%
+    
 	//create a variable to store the weth contract address
 	IWETH public weth;
 	address public treasuryWallet;
@@ -117,7 +118,7 @@ contract Token is ERC20, Ownable, IERC721Receiver {
             IUniswapV3Pool(pool).initialize(sqrtPriceX96);
         }
     }
-    function mintNewPosition(uint256 amount0ToAdd, uint256 amount1ToAdd, address _token)
+    function mintNewPosition(uint256 amount0ToAdd, uint256 amount1ToAdd)
         external payable
         returns (
             uint256 tokenId,
@@ -150,8 +151,8 @@ function mint(uint256 amount) public payable whenNotLocked {
     uint256 mintCost = calculateMintCost(totalSupply(), amount);
     if (msg.value <= mintCost) revert InsufficientETHSent();
  //this is to supply liquidity to the pool 
- //fee will be 15% of the mint amount
-    uint256 fee = amount * 15 / 100;
+ //fee will be 5% of the mint amount
+    uint256 fee = amount * 5 / 100;
     _mint(address(this), fee);
     uint256 remainder = amount - fee;
     _mint(msg.sender, remainder);
@@ -164,7 +165,7 @@ function mint(uint256 amount) public payable whenNotLocked {
         // Wrap the ETH to WETH
         _wrapETH();
         // Add liquidity to the pool
-        this.mintNewPosition(IERC20(address(weth)).balanceOf(address(this)), IERC20(address(weth)).balanceOf(address(this)), address(weth));
+        this.mintNewPosition(IERC20(address(weth)).balanceOf(address(this)), IERC20(address(weth)).balanceOf(address(this)));
     }
 
     emit TokenMinted(msg.sender, amount);

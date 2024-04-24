@@ -1765,7 +1765,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     TokenFactory: {
-      address: "0xa1C150e619f7F6Eda8573Fa9316252ae52758DAC",
+      address: "0x8a52893C546eb2BF2CB85444317a7F750fEB05bB",
       abi: [
         {
           inputs: [],
@@ -1845,6 +1845,12 @@ const deployedContracts = {
               name: "symbol",
               type: "string",
             },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "date",
+              type: "uint256",
+            },
           ],
           name: "TokenCreated",
           type: "event",
@@ -1910,6 +1916,35 @@ const deployedContracts = {
               name: "symbol",
               type: "string",
             },
+            {
+              internalType: "bytes32",
+              name: "salt",
+              type: "bytes32",
+            },
+          ],
+          name: "findDeploymentAddress",
+          outputs: [
+            {
+              internalType: "address",
+              name: "deploymentAddress",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "symbol",
+              type: "string",
+            },
           ],
           name: "getCreationCode",
           outputs: [
@@ -1917,6 +1952,19 @@ const deployedContracts = {
               internalType: "bytes",
               name: "creationCode",
               type: "bytes",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getTokens",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
             },
           ],
           stateMutability: "view",
@@ -2001,6 +2049,25 @@ const deployedContracts = {
               internalType: "bool",
               name: "",
               type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "tokens",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
             },
           ],
           stateMutability: "view",

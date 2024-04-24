@@ -1,0 +1,8 @@
+{
+  "base-sepolia": {
+    "TokenFactory": {
+      "address": "0x8a52893C546eb2BF2CB85444317a7F750fEB05bB",
+      "startBlock": 9080479
+    }
+  }
+}

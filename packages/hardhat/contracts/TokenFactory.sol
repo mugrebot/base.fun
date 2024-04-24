@@ -4,6 +4,8 @@ import "./interfaces/NoDelegateCall.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./token.sol";
 
+
+
 contract TokenFactory is NoDelegateCall, Ownable {
     mapping(string => bool) public tokenNames;
     mapping(string => bool) public tokenSymbols;
@@ -12,12 +14,41 @@ contract TokenFactory is NoDelegateCall, Ownable {
     address public positionManager = 0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24;
     address public treasuryWallet = 0x820AE05036E269BecbD3B01aA7e30bBc9f75026D;
 
+    //array for all tokens created
+    //array
+    address[] public tokens;
+    address parent;
+
     error TokenNameSymbolExists();
 
-    event TokenCreated(address tokenAddress, address owner, string name, string symbol);
+    event TokenCreated(address tokenAddress, address owner, string name, string symbol, uint date);
     
 
     constructor() Ownable(msg.sender) {}
+
+    function findDeploymentAddress(
+        string memory name,
+        string memory symbol,
+        bytes32 salt
+    ) public view returns (address deploymentAddress) {
+        bytes memory creationCode = getCreationCode(name, symbol);
+
+        deploymentAddress = address(
+            uint160( // downcast to match the address type.
+                uint256( // convert to uint to truncate upper digits.
+                    keccak256( // compute the CREATE2 hash using 4 inputs.
+                        abi.encodePacked( // pack all inputs to the hash together.
+                            hex"ff", // start with 0xff to distinguish from RLP.
+                            address(this), // this contract will be the caller.
+                            salt, // pass in the supplied salt value.
+                            keccak256( // pass in the hash of initialization code.
+                            abi.encodePacked(creationCode))
+                        )
+                    )
+                )
+            )
+        );
+    }
 
      function createToken(
         string memory name,
@@ -34,7 +65,8 @@ contract TokenFactory is NoDelegateCall, Ownable {
 
         tokenNames[name] = true;
         tokenSymbols[symbol] = true;
-        emit TokenCreated(tokenAddress, msg.sender, name, symbol);
+        tokens.push(tokenAddress);
+        emit TokenCreated(address(tokenAddress), msg.sender, name, symbol, block.timestamp);
     }
 
     function getCreationCode(string memory name, string memory symbol)
@@ -60,5 +92,10 @@ contract TokenFactory is NoDelegateCall, Ownable {
 
     function setTreasuryWallet(address _treasuryWallet) external onlyOwner {
         treasuryWallet = _treasuryWallet;
+    }
+
+    //function to get all tokens created
+    function getTokens() external view returns (address[] memory) {
+        return tokens;
     }
 }
