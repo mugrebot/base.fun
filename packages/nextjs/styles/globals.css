@@ -30,3 +30,44 @@ p {
 .btn.btn-ghost {
   @apply shadow-none;
 }
+
+/* App.module.css */
+.container {
+  background-color: #4caf50; /* A light green background */
+  color: #1b5e20; /* Dark green text for high contrast */
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  background-color: #2e7d32; /* A darker green for the header */
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.card {
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid #4caf50; /* Green border for each card */
+  border-radius: 8px;
+  /* make the background green*/
+  background-color: #e8f5e9;
+}
+
+button {
+  background-color: #4caf50; /* Green button background */
+  color: white; /* White text for high contrast */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+h1, h2 {
+  color: #66bb6a; /* Medium green for titles */
+}
+
+p {
+  line-height: 1.6;
+}
+

@@ -1,71 +1,71 @@
 "use client";
+import React from "react";
 
-import Link from "next/link";
-import type { NextPage } from "next";
-import { useAccount } from "wagmi";
-import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Address } from "~~/components/scaffold-eth";
-import { useEffect, useState } from "react";
-import { createPublicClient, http, parseAbi, useContractWrite } from "viem";
-import { mainnet } from "wagmi";
-import tokenAbi from "../../hardhat/deployments/localhost/Token.json";
+interface CardProps {
+  title: string;
+  content: string;
+  buttonLabel?: string;
+  onButtonClick?: () => void;
+}
 
-const tokenContractAddress = "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d";
+const Card: React.FC<CardProps> = ({ title, content, buttonLabel, onButtonClick }) => (
+  <div className="card">
+    <h2>{title}</h2>
+    <p>{content}</p>
+    {buttonLabel && onButtonClick && (
+      <button onClick={onButtonClick}>{buttonLabel}</button>
+    )}
+  </div>
+);
 
-const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
-  const [currentPrice, setCurrentPrice] = useState<number | undefined>();
-
-
-  // Define your contract using Viem hooks
-  const ABI = parseAbi([
-    // Constructor is not needed in ABI for contract interactions
-    
-    // Token Information
-    "function name() view returns (string)",
-    "function symbol() view returns (string)",
-    "function decimals() view returns (uint8)",
-    "function totalSupply() view returns (uint256)",
-    
-    // Token Ownership
-    "function owner() view returns (address)",
-    "function transferOwnership(address newOwner)",
-    
-    // Token Balances and Allowances
-    "function balanceOf(address account) view returns (uint256)",
-    "function allowance(address owner, address spender) view returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-    
-    // Token Operations
-    "function transfer(address to, uint256 amount) returns (bool)",
-    "function transferFrom(address from, address to, uint256 amount) returns (bool)",
-    
-    // Minting New Tokens
-    "function mint(uint256 amount) payable",
-    "function calculateMintCost(uint256 currentSupply, uint256 mintAmount) pure returns (uint256)",
-    
-    // Adjusting Token Parameters
-    "function setTreasuryWallet(address _treasuryWallet)",
-    
-    // Uniswap Integration
-    "function uniswapV2Pair() view returns (address)",
-    "function uniswapV2Router() view returns (address)"
-  ]);
-
-  const wagmiConfig = {
-    address: tokenContractAddress,
-    abi: ABI,
-  };
-
-
-
+export default function Page() {
   return (
-    <>
-      <div className="flex items-center flex-col flex-grow pt-10">
-        {/* Existing content */}
-      </div>
-    </>
-  );
-};
+    <div className="container">
+      <Card
+        title="Welcome to m00n.fun"
+        content="Bonding curve 🤝 Liquidity Pool 
+        Deploy a coin, reach the threshold, and release your token to the world with a lil bit of liquidity."
+      />
+      <Card
+        title="Understanding the Bonding Curve"
+        content="Our platform utilizes a bonding curve to ensure that early participants receive tokens at a lower price. This price increases as more tokens are minted, rewarding early participation."
+      />
+      <Card
+        title="Tokenomics"
+        content="5% of all tokens purchased sent to contract at the time of mint. Once a liquidity threshold is met, 
+         95% of the ETH, (100% - 2% to the contract owner, 1% to the minter who reaches the liquidity threshold, and 1% to the platform)
+        are deployed to a Uniswap V3 pool."
+      />
+      <Card
+        title="Uniswap V3 Pool"
+        content="The liquidity from token sales is added to a Uniswap V3 pool with a 1% fee, the LP nft will be sent to the burn address (0x...dead) and the fee recipient will be 
+        the platform, tokens will be burn and ETH will be kept by the platform"
+      />
+      <Card
+        title="I think memecoins are bad"
+        content="That's great for you, i suggest heading on over to weenie hut jr. thats more your style"
+        buttonLabel="Take me to weenie hut jr."
+        onButtonClick={() => {
+          window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        }}
+      />
+      <Card
+        title="I'm ready to deploy a token"
+        content="Great! Click the button below to get started."
+        buttonLabel="Deploy Token"
+        onButtonClick={() => {
+          window.location.href = "/deploy";
+        }}
+      />
+      <br></br>
+      <Card
+        title="Boilerplate"
+        content="m00n.fun does not own any of the tokens deployed on the platform, we are not responsible for any of the tokens deployed on the platform or their performance, Trading crypocurrencies
+        carries a high level of risk and may not be suitable for all investors."
+      />
+    </div>
+    
 
-export default Home;
+
+  );
+}

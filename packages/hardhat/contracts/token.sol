@@ -3,9 +3,8 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../node_modules/@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
-import "../node_modules/@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
+import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 
 
 interface IWETH is IERC20 {
@@ -50,25 +49,29 @@ interface IERC721Receiver {
 
 
 contract Token is ERC20, Ownable, IERC721Receiver {
-	using SafeERC20 for IERC20;
 	uint256 public liquidityProvisionThreshold = 10 ether;
 	bool public isLiquidityProvisionLocked = false;
-	IUniswapV3Factory public uniswapV3Factory;
-    INonfungiblePositionManager public positionManager;
+	IUniswapV3Factory public immutable uniswapV3Factory;
+    INonfungiblePositionManager public immutable positionManager;
     // Define constants for pool parameters,
     int24 private constant MIN_TICK = -887272;
     int24 private constant MAX_TICK = -MIN_TICK;
     int24 private constant TICK_SPACING = 200;
-    uint24 private constant POOL_FEE = 10000; // Pool fee in hundredths of a bip, i.e., 3000 represents 0.3%
+    uint24 private constant POOL_FEE = 10000;
+
+    //constant to protect contract, final minter will be a bool to check if the final minter has been paid
+    bool public isFinalMinterPaid = false;
+
     
 	//create a variable to store the weth contract address
-	IWETH public weth;
+	IWETH public immutable weth;
 	address public treasuryWallet;
 	error InsufficientETHSent();
 	error ExceedsThreshold();
 	error UnauthorizedAccess();
 	error LiquidityProvisionLocked();
     error NotEnoughMinted();
+    error CurrenciesOutOfOrderOrEqual();
 
 	constructor(
 		string memory name_,
@@ -82,8 +85,9 @@ contract Token is ERC20, Ownable, IERC721Receiver {
         uniswapV3Factory = IUniswapV3Factory(_uniswapV3Factory);
         positionManager = INonfungiblePositionManager(_positionManager);
         weth = IWETH(_dummyWETH);
-        createAndInitializePoolIfNecessary(address(weth), address(this), POOL_FEE);
-        address pool = uniswapV3Factory.getPool(address(weth), address(this), POOL_FEE);
+
+        // Ensure the currency order is correct (currency0 < currency1)
+        createAndInitializePoolIfNecessary(address(this), address(weth), POOL_FEE);
         treasuryWallet = _treasuryWallet;
         _mint(0x000000000000000000000000000000000000dEaD, 1e18);
 	}
@@ -109,9 +113,16 @@ contract Token is ERC20, Ownable, IERC721Receiver {
         address tokenA,
         address tokenB,
         uint24 fee // Initial sqrt price
-    ) public {
+    ) private {
         uint160 sqrtPriceX96 = 1 << 96;
         address pool = uniswapV3Factory.getPool(tokenA, tokenB, fee);
+    if (tokenA == tokenB) {
+        revert CurrenciesOutOfOrderOrEqual();
+    }
+
+    if (tokenA < tokenB) {
+        (tokenA, tokenB) = (tokenB, tokenA);
+    }
         if (pool == address(0)) {
             uniswapV3Factory.createPool(tokenA, tokenB, fee);
             pool = uniswapV3Factory.getPool(tokenA, tokenB, fee);
@@ -127,12 +138,15 @@ contract Token is ERC20, Ownable, IERC721Receiver {
             uint256 amount1
         )
     {
+
+        if (isLiquidityProvisionLocked == true ) revert NotEnoughMinted();
+
         IERC20(address(this)).approve(address(positionManager), amount0ToAdd);
         IERC20(address(weth)).approve(address(positionManager), amount1ToAdd);
         INonfungiblePositionManager.MintParams memory params =
         INonfungiblePositionManager.MintParams({
-            token0: address(weth),
-            token1: address(this),
+            token0: address(this),
+            token1: address(weth),
             fee: POOL_FEE,
             tickLower: (MIN_TICK / TICK_SPACING) * TICK_SPACING,
             tickUpper: (MAX_TICK / TICK_SPACING) * TICK_SPACING,
@@ -156,7 +170,7 @@ function mint(uint256 amount) public payable whenNotLocked {
     _mint(address(this), fee);
     uint256 remainder = amount - fee;
     _mint(msg.sender, remainder);
-    if (msg.value > mintCost) {
+    if (msg.value >= mintCost) {
         payable(msg.sender).transfer(msg.value - mintCost);
     }
     // If threshold is reached and not locked, provide liquidity
@@ -182,20 +196,20 @@ function mint(uint256 amount) public payable whenNotLocked {
             emit TokenBurned(msg.sender, amount);
         }
     
-        function calculateMintCost(uint256 currentSupply, uint256 mintAmount) public view returns (uint256) {
-            if (currentSupply == 0) {
+        function calculateMintCost(uint256 currentSupply, uint256 mintAmount) public pure returns (uint256) {
+            unchecked {if (currentSupply == 0) {
             return ((_sumOfPriceToNTokens(currentSupply + mintAmount)));
             }
             else {
                 return ((_sumOfPriceToNTokens(currentSupply + mintAmount)) - (_sumOfPriceToNTokens(currentSupply)));
-            }
+            }}
         }
     
         function calculateBurnProceeds(uint256 amount) public view returns (uint256) {
             uint256 currentSupply = totalSupply();
             if (amount >= currentSupply) revert ExceedsThreshold();
     
-            return _sumOfPriceToNTokens(currentSupply) - _sumOfPriceToNTokens(currentSupply - amount);
+            unchecked {return _sumOfPriceToNTokens(currentSupply) - _sumOfPriceToNTokens(currentSupply - amount);}
         }
 
     
@@ -203,21 +217,31 @@ function mint(uint256 amount) public payable whenNotLocked {
         // This function was previously used in your bonding curve example,
         // Ensure to replace or adjust it to fit your actual use case.
         function _sumOfPriceToNTokens(uint256 n) internal pure returns (uint256) {
-            return (n / 1e18)*((n/1e18) + 1) * (2 * (n/1e18) + 1) / 6;
+           unchecked { return (n / 1e18)*((n/1e18) + 1) * (2 * (n/1e18) + 1) / 6;}
         }
 
 
         function _wrapETH() public payable {
             //check if liquidity locked is true
+            //if final minter has been paid, revert
+            if (isFinalMinterPaid) revert UnauthorizedAccess();
             if (!isLiquidityProvisionLocked) revert LiquidityProvisionLocked();
 
             address payable wethAddressPayable = payable(address(weth));
             // Ensure the conversion was successful and the address is not the zero address
             //deposit 5% of the eth to a treasury wallet, 1% to the owner of the contract
-            uint256 treasuryAmount = address(this).balance * 5 / 100;
+            uint256 treasuryAmount = address(this).balance * 4 / 100;
             payable(treasuryWallet).transfer(treasuryAmount);
             uint256 ownerAmount = address(this).balance * 1 / 100;
             payable(owner()).transfer(ownerAmount);
+
+            //lets also pay out the final minter 0.5% since they pay a little extra gas
+            uint256 finalMinterAmount = address(this).balance * 5 / 1000;
+            //change bool to true
+            isFinalMinterPaid = true;
+
+            payable(msg.sender).transfer(finalMinterAmount);
+
             // Send the ETH to the WETH contract
             (bool success, ) = wethAddressPayable.call{value: address(this).balance}("");
             if (!success) revert InsufficientETHSent();

@@ -8,24 +8,24 @@ module.exports = {
     themes: [
       {
         light: {
-          primary: "#93BBFB",
-          "primary-content": "#212638",
-          secondary: "#DAE8FF",
-          "secondary-content": "#212638",
-          accent: "#93BBFB",
-          "accent-content": "#212638",
+          primary: "#4caf50", // A green color as the primary color
+          "primary-content": "#ffffff", // White content on green background
+          secondary: "#8bc34a", // A lighter green for secondary
+          "secondary-content": "#ffffff", // White content for secondary green background
+          accent: "#388e3c", // Dark green for accent
+          "accent-content": "#ffffff", // White content for dark green background
           neutral: "#212638",
           "neutral-content": "#ffffff",
-          "base-100": "#ffffff",
-          "base-200": "#f4f8ff",
-          "base-300": "#DAE8FF",
-          "base-content": "#212638",
-          info: "#93BBFB",
-          success: "#34EEB6",
-          warning: "#FFCF72",
-          error: "#FF8863",
+          "base-100": "#ffffff", // White background for base
+          "base-200": "#e8f5e9", // Very light green for lighter areas
+          "base-300": "#c8e6c9", // Light green for medium background areas
+          "base-content": "#212638", // Mostly text color on white background
+          info: "#2196f3",
+          success: "#4caf50",
+          warning: "#ffeb3b",
+          error: "#f44336",
 
-          "--rounded-btn": "9999rem",
+          "--rounded-btn": "9999rem", // Fully rounded buttons
 
           ".tooltip": {
             "--tooltip-tail": "6px",
@@ -37,25 +37,23 @@ module.exports = {
             opacity: "80%",
           },
         },
-      },
-      {
         dark: {
-          primary: "#212638",
-          "primary-content": "#F9FBFF",
-          secondary: "#323f61",
-          "secondary-content": "#F9FBFF",
-          accent: "#4969A6",
-          "accent-content": "#F9FBFF",
-          neutral: "#F9FBFF",
-          "neutral-content": "#385183",
-          "base-100": "#385183",
-          "base-200": "#2A3655",
-          "base-300": "#212638",
-          "base-content": "#F9FBFF",
-          info: "#385183",
-          success: "#34EEB6",
-          warning: "#FFCF72",
-          error: "#FF8863",
+          primary: "#2e7d32", // Dark green on dark theme for primary
+          "primary-content": "#ffffff", // White content on dark green background
+          secondary: "#43a047", // Medium dark green for secondary
+          "secondary-content": "#ffffff",
+          accent: "#1b5e20", // Even darker green for accents
+          "accent-content": "#ffffff",
+          neutral: "#212638",
+          "neutral-content": "#e8f5e9",
+          "base-100": "#303030", // Darker background in dark theme
+          "base-200": "#212638", // Deep dark background
+          "base-300": "#1b5e20", // Very dark green for tertiary areas
+          "base-content": "#ffffff", // Text color on dark background
+          info: "#2196f3",
+          success: "#4caf50",
+          warning: "#ffeb3b",
+          error: "#f44336",
 
           "--rounded-btn": "9999rem",
 
