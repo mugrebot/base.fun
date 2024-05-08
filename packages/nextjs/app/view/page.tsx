@@ -28,8 +28,6 @@ export default function TokensPage() {
     functionName: "getTokens",
   });
 
-  console.log(beans);
-
   //map over the array and make a card for each address using contract bounce which takes an address as a prop
 
   return (

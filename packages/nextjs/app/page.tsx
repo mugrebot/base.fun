@@ -1,7 +1,17 @@
 "use client";
 
 import React from "react";
+import styled from "styled-components";
 
+const StyledPage = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: #4caf50; /* A light green background */
+  color: #1b5e20; /* Dark green text for high contrast */
+  font-family: Arial, sans-serif;
+  width: 100%;
+
+`;
 interface CardProps {
   title: string;
   content: string;
@@ -19,7 +29,7 @@ const Card: React.FC<CardProps> = ({ title, content, buttonLabel, onButtonClick 
 
 export default function Page() {
   return (
-    <div className="container">
+    <StyledPage>
       <Card
         title="Welcome to m00n.fun"
         content="Bonding curve 🤝 Liquidity Pool 
@@ -57,6 +67,6 @@ export default function Page() {
         content="m00n.fun does not own any of the tokens deployed on the platform, we are not responsible for any of the tokens deployed on the platform or their performance, Trading crypocurrencies
         carries a high level of risk and may not be suitable for all investors."
       />
-    </div>
+    </StyledPage>
   );
 }

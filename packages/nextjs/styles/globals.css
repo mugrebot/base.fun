@@ -36,6 +36,8 @@ p {
   background-color: #4caf50; /* A light green background */
   color: #1b5e20; /* Dark green text for high contrast */
   font-family: Arial, sans-serif;
+  width: 100%;
+  min-height: 100vh;
 }
 
 .header {

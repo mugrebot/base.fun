@@ -6,6 +6,14 @@ import TokenFactoryABI from "../../../hardhat/deployments/baseSepolia/TokenFacto
 import { Abi } from "abitype";
 import styled from "styled-components";
 import { useScaffoldContractWrite, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
+import { createPublicClient, http } from 'viem'
+import { baseSepolia } from 'viem/chains'
+
+export const publicClient = createPublicClient({
+  chain: baseSepolia,
+  transport: http()
+})
+
 
 const Container = styled.div`
   display: flex;
@@ -70,6 +78,7 @@ export default function Deploy() {
   const [tokenSymbol, setTokenSymbol] = useState("");
   const [contractAddress, setContractAddress] = useState("");
   const [transactionResponse, setTransactionResponse] = useState();
+  const [blockstart, setBlockStart] = useState(BigInt("9720943") as bigint);
 
   const { writeAsync: deployToken, isLoading: deployTokenLoading } = useScaffoldContractWrite({
     contractName: "TokenFactory",
@@ -81,7 +90,7 @@ export default function Deploy() {
   const { data: tokenAddress } = useScaffoldEventHistory({
     contractName: "TokenFactory",
     eventName: "TokenCreated",
-    fromBlock: BigInt("9682199"),
+    fromBlock: blockstart,
     blockData: true,
     transactionData: true,
     receiptData: true,
@@ -91,6 +100,8 @@ export default function Deploy() {
   const handleDeploy = async () => {
     console.log("Deploying Token:", tokenName, tokenSymbol);
     try {
+
+      handleBlockUpdate();
       setTransactionResponse(await deployToken());
 
       //wait 30 seconds then call handleEventUpdate
@@ -115,8 +126,25 @@ export default function Deploy() {
       }
     } catch (error) {
       console.error("Failed to fetch or process beans:", error);
+      console.error("updating updating block range");
     }
   };
+
+  const handleBlockUpdate = async () => {
+    try {
+      const latestBlock = await publicClient.getBlockNumber() 
+      console.log("latest block", latestBlock);
+
+      if (latestBlock) {
+        setBlockStart(latestBlock); // Assuming args[0] is the address, adjust as needed
+      } else {
+        console.log("No matching transaction hash found.");
+      }
+    } catch (error) {
+      console.error("Failed to fetch or process beans:", error);
+      console.error("updating updating block range");
+    }
+  }
 
   useEffect(() => {
     if (tokenAddress) {

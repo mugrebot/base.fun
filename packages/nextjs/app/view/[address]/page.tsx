@@ -142,9 +142,9 @@ const ContractPage = () => {
     const mintamount = amount;
     try {
       const mintCost = calculateMintCost;
-      console.log("Mint cost:", mintCost?.toString());
+  
       setCalculatedEth(mintCost || BigInt(0));
-      console.log("Mint cost:", mintCost?.toString());
+
     } catch (error) {
       console.error("Error calculating mint cost:", error);
     }
@@ -164,7 +164,7 @@ const ContractPage = () => {
         })
         .catch(error => {
           console.error("Minting failed:", error);
-          console.log("Minting:", amount * BigInt(10^18));
+
         });
     } else {
       alert("Please connect your wallet");
@@ -196,10 +196,6 @@ const ContractPage = () => {
 
   const balanceInWei = BigInt(liqBalance?.value?.toString() || "0");
   const progress = (Number(balanceInWei) / Number(liqThreshold)) * 100;
-
-  console.log(amount * BigInt(10**18));
-  console.log(totalSupply);
-  console.log(calculateMintCost);
 
   return (
     <StyledPage>
