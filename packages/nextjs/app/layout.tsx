@@ -7,9 +7,9 @@ import "~~/styles/globals.css";
 const baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : `http://localhost:${process.env.PORT || 3000}`;
-const imageUrl = `${baseUrl}/thumbnail.jpg`;
+const imageUrl = `mjcrying.jpeg`;
 
-const title = "Scaffold-ETH 2 App";
+const title = "m00n.fun test";
 const titleTemplate = "%s | Scaffold-ETH 2";
 const description = "Built with 🏗 Scaffold-ETH 2";
 
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     description,
   },
   icons: {
-    icon: [{ url: "/favicon.png", sizes: "32x32", type: "image/png" }],
+    icon: [{ url: "/mjcrying.jpeg", sizes: "32x32", type: "image/png" }],
   },
 };
 
