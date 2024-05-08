@@ -5,7 +5,7 @@ import Link from "next/link";
 import TokenFactoryABI from "../../../hardhat/deployments/baseSepolia/TokenFactory.json";
 import { Abi } from "abitype";
 import styled from "styled-components";
-import { useScaffoldContractRead, useScaffoldContractWrite, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractWrite, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 
 const Container = styled.div`
   display: flex;
@@ -70,7 +70,6 @@ export default function Deploy() {
   const [tokenSymbol, setTokenSymbol] = useState("");
   const [contractAddress, setContractAddress] = useState("");
   const [transactionResponse, setTransactionResponse] = useState();
-  const [time, setTime] = useState(false);
 
   const { writeAsync: deployToken, isLoading: deployTokenLoading } = useScaffoldContractWrite({
     contractName: "TokenFactory",
@@ -79,14 +78,7 @@ export default function Deploy() {
     args: [tokenName, tokenSymbol],
   });
 
-  const { data: beans } = useScaffoldContractRead({
-    contractName: "TokenFactory",
-    functionName: "getTokens",
-    abi: TokenFactoryABI.abi as Abi,
-    address: TokenFactoryABI.address,
-  });
-
-  const { data: tokenAddress, isLoading: tokenAddressLoading } = useScaffoldEventHistory({
+  const { data: tokenAddress } = useScaffoldEventHistory({
     contractName: "TokenFactory",
     eventName: "TokenCreated",
     fromBlock: BigInt("9682199"),
@@ -107,31 +99,30 @@ export default function Deploy() {
       }, 20000);
     } catch (error) {
       console.error("Error deploying token:", error);
-    } 
+    }
   };
 
-const handleEventUpdate = async () => {
+  const handleEventUpdate = async () => {
     try {
-        const latestBeans = await tokenAddress; // Assume this function fetches the latest beans array
-        
-        const foundEvent = latestBeans?.find(event => event.args[2] === tokenName && event.args[3] === tokenSymbol);
+      const latestBeans = await tokenAddress; // Assume this function fetches the latest beans array
 
-        if (foundEvent) {
-            setContractAddress(foundEvent.args[0]); // Assuming args[0] is the address, adjust as needed
-        } else {
-            console.log('No matching transaction hash found.');
-        }
+      const foundEvent = latestBeans?.find(event => event.args[2] === tokenName && event.args[3] === tokenSymbol);
+
+      if (foundEvent) {
+        setContractAddress(foundEvent.args[0]); // Assuming args[0] is the address, adjust as needed
+      } else {
+        console.log("No matching transaction hash found.");
+      }
     } catch (error) {
-        console.error('Failed to fetch or process beans:', error);
+      console.error("Failed to fetch or process beans:", error);
     }
-};
+  };
 
   useEffect(() => {
     if (tokenAddress) {
       handleEventUpdate();
     }
-  }, [tokenAddress]);
-
+  }, [handleEventUpdate, tokenAddress]);
 
   return (
     <Container>
@@ -162,7 +153,7 @@ const handleEventUpdate = async () => {
           {transactionResponse && !contractAddress && <p>Checking the chain....</p>}
           {transactionResponse && contractAddress && (
             <Link href={`/view/${contractAddress}`} passHref>
-              <p style={{ textDecoration: 'underline' }}>deployed at: {contractAddress}</p>
+              <p style={{ textDecoration: "underline" }}>deployed at: {contractAddress}</p>
             </Link>
           )}
         </div>

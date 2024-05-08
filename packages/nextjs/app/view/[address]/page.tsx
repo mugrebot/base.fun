@@ -1,12 +1,13 @@
 "use client";
+
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
-import styled from 'styled-components';
 import Token from "../../../../hardhat/deployments/baseSepolia/Token.json";
 import { Abi } from "abitype";
+import styled from "styled-components";
 import { parseUnits } from "viem";
-import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 import { useBalance } from "wagmi";
+import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 
 const StyledPage = styled.div`
   display: flex;
@@ -98,14 +99,11 @@ const ContractPage = () => {
     address: address,
   });
 
-  const { data: totalSupply } = useScaffoldContractRead({
-    contractName: "Token",
-    functionName: "totalSupply",
-    abi: Token.abi as Abi,
-    address: address,
-  });
-
-  const { data: calculateMintCost, writeAsync: mintIt, isLoading: mintItLoading } = useScaffoldContractWrite({
+  const {
+    data: calculateMintCost,
+    writeAsync: mintIt,
+    isLoading: mintItLoading,
+  } = useScaffoldContractWrite({
     contractName: "Token",
     functionName: "mint",
     address: address,
@@ -147,26 +145,25 @@ const ContractPage = () => {
   if (isLoading) return <div>Fetching balance…</div>;
   if (isError) return <div>Error fetching balance</div>;
 
-  const balanceInWei = BigInt(liqBalance?.value?.toString() || '0');
-  const progress = Number(balanceInWei) / Number(liqThreshold) * 100;
-
+  const balanceInWei = BigInt(liqBalance?.value?.toString() || "0");
+  const progress = (Number(balanceInWei) / Number(liqThreshold)) * 100;
 
   return (
     <StyledPage>
       <Form>
-      <Title>Contract Address: {address}</Title>
-      <Subtitle>Name: {name}</Subtitle>
-      <Subtitle>Owner: {owner}</Subtitle>
-      <Subtitle>Symbol: {symbol}</Subtitle>
-      <p>Liquidity: {liqBalance?.formatted} ETH</p>
-      <p>Threshold: 0.5 ETH</p>
-      <ProgressBarContainer>
-        <ProgressBarFill style={{ width: `${progress}%` }} />
-      </ProgressBarContainer>
-      <Input type="number" value={Number(amount)} onChange={e => setAmount(BigInt(e.target.value))} />
-      <Button onClick={handleMint} disabled={mintItLoading}>
-        {mintItLoading ? 'Minting...' : 'Mint'}
-      </Button>
+        <Title>Contract Address: {address}</Title>
+        <Subtitle>Name: {name}</Subtitle>
+        <Subtitle>Owner: {owner}</Subtitle>
+        <Subtitle>Symbol: {symbol}</Subtitle>
+        <p>Liquidity: {liqBalance?.formatted} ETH</p>
+        <p>Threshold: 0.5 ETH</p>
+        <ProgressBarContainer>
+          <ProgressBarFill style={{ width: `${progress}%` }} />
+        </ProgressBarContainer>
+        <Input type="number" value={Number(amount)} onChange={e => setAmount(BigInt(e.target.value))} />
+        <Button onClick={handleMint} disabled={mintItLoading}>
+          {mintItLoading ? "Minting..." : "Mint"}
+        </Button>
       </Form>
     </StyledPage>
   );
