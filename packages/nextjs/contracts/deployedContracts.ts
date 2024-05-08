@@ -969,7 +969,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Profiles: {
-      address: "0xf9E5F7483db4E9785684DC168b431eA88EA1C993",
+      address: "0x705eA84171938dAFc69421C3E5ea90B313E54106",
       abi: [
         {
           inputs: [
@@ -1247,7 +1247,7 @@ const deployedContracts = {
       },
     },
     Token: {
-      address: "0xFFa54e0875Cd8F19300B5A87553D7B7c7c8FF1FA",
+      address: "0xa4f7005f58762919B312404Ac63E7f015D414Cf2",
       abi: [
         {
           inputs: [
@@ -2033,7 +2033,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     TokenFactory: {
-      address: "0xd1618D0D4cfAE635C1Ca7a585c6a85b76adE5904",
+      address: "0xDf81dd298726A8EEEF66594afAb4bB10089C35b6",
       abi: [
         {
           inputs: [],
