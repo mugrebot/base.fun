@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { ethers } from 'ethers';
 import { useProvider, useContract } from 'wagmi';
 import { Abi } from 'abitype';
+import styled from "styled-components";
 
 //address and abi for tokenfactory is at packages/hardhat/deployments/baseSepolia/TokenFactory.json
 import TokenFactory from '../../../hardhat/deployments/baseSepolia/TokenFactory.json';
@@ -16,10 +17,14 @@ import ContractBounce from '~~/components/ContractBounce';
 
 console.log(TokenFactory.address);
 
+const Container = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
-
-const TokenCard = `
-  background-color: white;
+const TokenCard = styled.div`
+  background-color: #013220;
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -42,14 +47,15 @@ export default function TokensPage() {
 
     return (
         <div>
-            <h1>Beans</h1>
+            <Container>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {beans?.map((address: string) => (
-                    <div key={address} style={{ margin: 10 }}>
+                    <TokenCard key={address} style={{ margin: 10 }}>
                         <ContractBounce address={address} />
-                    </div>
+                    </TokenCard>
                 ))}
             </div>
+            </Container>
         </div>
     );
 

@@ -49,7 +49,7 @@ interface IERC721Receiver {
 
 
 contract Token is ERC20, Ownable, IERC721Receiver {
-	uint256 public liquidityProvisionThreshold = 10 ether;
+	uint256 public liquidityProvisionThreshold = 0.5 ether;
 	bool public isLiquidityProvisionLocked = false;
 	IUniswapV3Factory public immutable uniswapV3Factory;
     INonfungiblePositionManager public immutable positionManager;
@@ -80,7 +80,7 @@ contract Token is ERC20, Ownable, IERC721Receiver {
         address _uniswapV3Factory,
         address _positionManager,
         address _treasuryWallet
-	) ERC20(name_, symbol_) Ownable(msg.sender) {
+	) ERC20(name_, symbol_) Ownable(tx.origin) {
         
         uniswapV3Factory = IUniswapV3Factory(_uniswapV3Factory);
         positionManager = INonfungiblePositionManager(_positionManager);

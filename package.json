@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.71.0",
-    "@uniswap/v3-core": "^1.0.1"
+    "@uniswap/v3-core": "^1.0.1",
+    "styled-components": "^6.1.10"
   }
 }

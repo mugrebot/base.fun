@@ -44,10 +44,6 @@ contract TokenFactory is NoDelegateCall, Ownable {
         return tokens;
     }
 
-    // verify a signature for a token is from the owner
-    function verifyTokenOwner(address tokenAddress, bytes memory signature) external view returns (bool) {
-        return owner() == ECDSA.recover(keccak256(abi.encodePacked(tokenAddress)), signature);
-    }
 
 
 }

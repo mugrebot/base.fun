@@ -1,22 +1,80 @@
 "use client";
-
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
+import styled from 'styled-components';
 import Token from "../../../../hardhat/deployments/baseSepolia/Token.json";
 import { Abi } from "abitype";
-import { formatEther, parseEther, parseUnits } from "viem";
-import { useBalance } from "wagmi";
-import { useContractWrite, useNetwork } from "wagmi";
+import { parseUnits } from "viem";
 import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
-import IPFS from "~~/components/IPFSSign";
+import { useBalance } from "wagmi";
+
+const StyledPage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+`;
+
+const Form = styled.div`
+  background: #013220;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+`;
+
+const Title = styled.h1`
+  margin-bottom: 20px;
+`;
+
+const Subtitle = styled.h2`
+  margin: 10px 0;
+`;
+
+const Input = styled.input`
+  padding: 8px;
+  margin: 20px 0;
+  width: 300px; // Wider input for better accessibility
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px; // Larger font size for readability
+`;
+
+const Button = styled.button`
+  padding: 12px 24px;
+  color: white;
+  background-color: #48bb78; // Use a green shade consistent with other buttons
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px; // Larger text for easier interaction
+  margin-top: 20px;
+  &:hover {
+    background-color: #36a167; // Slightly darker on hover for a pleasant effect
+  }
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed; // Indicate non-interactive state clearly
+  }
+`;
+
+const ProgressBarContainer = styled.div`
+  background-color: #e0e0e0;
+  border-radius: 8px;
+  margin: 10px 0;
+`;
+
+const ProgressBarFill = styled.div`
+  background-color: #76a9fa;
+  height: 20px;
+  border-radius: 8px;
+  transition: width 0.3s ease-in-out;
+`;
 
 const ContractPage = () => {
   const [amount, setAmount] = useState<bigint>(BigInt(1));
   const [calculatedEth, setCalculatedEth] = useState<bigint>(BigInt(0));
-
-  const [isMinimized, setIsMinimized] = useState(true);
-
   const address = useParams().address;
 
   const { data: name } = useScaffoldContractRead({
@@ -26,7 +84,6 @@ const ContractPage = () => {
     address: address,
   });
 
-
   const { data: owner } = useScaffoldContractRead({
     contractName: "Token",
     functionName: "owner",
@@ -34,37 +91,21 @@ const ContractPage = () => {
     address: address,
   });
 
-
-
   const { data: symbol } = useScaffoldContractRead({
     contractName: "Token",
     functionName: "symbol",
     abi: Token.abi as Abi,
-    address: address as string,
+    address: address,
   });
 
   const { data: totalSupply } = useScaffoldContractRead({
     contractName: "Token",
     functionName: "totalSupply",
     abi: Token.abi as Abi,
-    address: address as string,
+    address: address,
   });
 
-
-
-  
-
-  const { data: calculateMintCost } = useScaffoldContractRead({
-    contractName: "Token",
-    functionName: "calculateMintCost",
-    abi: Token.abi as Abi,
-    address: address as string,
-    args: [totalSupply, amount],
-  });
-
-
-
-  const { writeAsync: mintIt, isLoading: mintItLoading } = useScaffoldContractWrite({
+  const { data: calculateMintCost, writeAsync: mintIt, isLoading: mintItLoading } = useScaffoldContractWrite({
     contractName: "Token",
     functionName: "mint",
     address: address,
@@ -99,31 +140,35 @@ const ContractPage = () => {
     }
   };
 
-  const handleMinimize = () => {
-    setIsMinimized(!isMinimized);
-  };
+  const { data: liqBalance, isError, isLoading } = useBalance({ address: address });
+
+  const liqThreshold = BigInt(500000000000000000); // 0.5 ETH in wei
+
+  if (isLoading) return <div>Fetching balance…</div>;
+  if (isError) return <div>Error fetching balance</div>;
+
+  const balanceInWei = BigInt(liqBalance?.value?.toString() || '0');
+  const progress = Number(balanceInWei) / Number(liqThreshold) * 100;
+
 
   return (
-    <div>
-      <h1>Contract Address: {address}</h1>
-      <h2>Name: {name}</h2>
-      <h2>Owner: {owner}</h2>
-      <h2>Symbol: {symbol}</h2>
-      <input type="number" value={Number(amount)} onChange={e => setAmount(BigInt(e.target.value))} />
-      <button onClick={handleMint}>Mint</button>
-
-      {!isMinimized && (
-            <div>
-              <IPFS onMinimize={handleMinimize} />
-            </div>
-        )}
-        {isMinimized && (
-          <div style={{ position: "fixed", bottom: 100, left: 10 }}>
-            <button onClick={handleMinimize}>[EDIT PROFILE]</button>
-          </div>
-        )}
-    </div>
-    
+    <StyledPage>
+      <Form>
+      <Title>Contract Address: {address}</Title>
+      <Subtitle>Name: {name}</Subtitle>
+      <Subtitle>Owner: {owner}</Subtitle>
+      <Subtitle>Symbol: {symbol}</Subtitle>
+      <p>Liquidity: {liqBalance?.formatted} ETH</p>
+      <p>Threshold: 0.5 ETH</p>
+      <ProgressBarContainer>
+        <ProgressBarFill style={{ width: `${progress}%` }} />
+      </ProgressBarContainer>
+      <Input type="number" value={Number(amount)} onChange={e => setAmount(BigInt(e.target.value))} />
+      <Button onClick={handleMint} disabled={mintItLoading}>
+        {mintItLoading ? 'Minting...' : 'Mint'}
+      </Button>
+      </Form>
+    </StyledPage>
   );
 };
 

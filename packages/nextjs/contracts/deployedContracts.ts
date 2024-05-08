@@ -968,8 +968,286 @@ const deployedContracts = {
       ],
       inheritedFunctions: {},
     },
+    Profiles: {
+      address: "0xf9E5F7483db4E9785684DC168b431eA88EA1C993",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "version",
+              type: "string",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "ECDSAInvalidSignature",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "length",
+              type: "uint256",
+            },
+          ],
+          name: "ECDSAInvalidSignatureLength",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "s",
+              type: "bytes32",
+            },
+          ],
+          name: "ECDSAInvalidSignatureS",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "InvalidShortString",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "NotIPFSHash",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "NotOwner",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "NotValidSignature",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "StartsWithQm",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "str",
+              type: "string",
+            },
+          ],
+          name: "StringTooLong",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [],
+          name: "EIP712DomainChanged",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "DOMAIN_SEPARATOR",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "ipfs_string",
+              type: "string",
+            },
+            {
+              internalType: "address",
+              name: "_contract",
+              type: "address",
+            },
+          ],
+          name: "createMessage",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "eip712Domain",
+          outputs: [
+            {
+              internalType: "bytes1",
+              name: "fields",
+              type: "bytes1",
+            },
+            {
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "version",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "chainId",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "verifyingContract",
+              type: "address",
+            },
+            {
+              internalType: "bytes32",
+              name: "salt",
+              type: "bytes32",
+            },
+            {
+              internalType: "uint256[]",
+              name: "extensions",
+              type: "uint256[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "ipfsHash",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "_ipfsHash",
+              type: "string",
+            },
+            {
+              internalType: "address",
+              name: "_contract",
+              type: "address",
+            },
+            {
+              internalType: "bytes",
+              name: "signature",
+              type: "bytes",
+            },
+          ],
+          name: "recoverSigner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "_ipfsHash",
+              type: "string",
+            },
+            {
+              internalType: "address",
+              name: "_contract",
+              type: "address",
+            },
+            {
+              internalType: "bytes",
+              name: "signature",
+              type: "bytes",
+            },
+            {
+              internalType: "address payable",
+              name: "_token",
+              type: "address",
+            },
+          ],
+          name: "setIpfsHash",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "_ipfsHash",
+              type: "string",
+            },
+            {
+              internalType: "address",
+              name: "_contract",
+              type: "address",
+            },
+            {
+              internalType: "bytes",
+              name: "signature",
+              type: "bytes",
+            },
+          ],
+          name: "verifySignature",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {
+        eip712Domain: "@openzeppelin/contracts/utils/cryptography/EIP712.sol",
+      },
+    },
     Token: {
-      address: "0xB5DF455362DbC29A293385125924e337046c788D",
+      address: "0xFFa54e0875Cd8F19300B5A87553D7B7c7c8FF1FA",
       abi: [
         {
           inputs: [
@@ -1006,6 +1284,11 @@ const deployedContracts = {
           ],
           stateMutability: "nonpayable",
           type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "CurrenciesOutOfOrderOrEqual",
+          type: "error",
         },
         {
           inputs: [
@@ -1399,30 +1682,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "tokenA",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "tokenB",
-              type: "address",
-            },
-            {
-              internalType: "uint24",
-              name: "fee",
-              type: "uint24",
-            },
-          ],
-          name: "createAndInitializePoolIfNecessary",
-          outputs: [],
-          stateMutability: "nonpayable",
+          stateMutability: "pure",
           type: "function",
         },
         {
@@ -1462,6 +1722,19 @@ const deployedContracts = {
               internalType: "address",
               name: "",
               type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "isFinalMinterPaid",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
             },
           ],
           stateMutability: "view",
@@ -1517,11 +1790,6 @@ const deployedContracts = {
               internalType: "uint256",
               name: "amount1ToAdd",
               type: "uint256",
-            },
-            {
-              internalType: "address",
-              name: "_token",
-              type: "address",
             },
           ],
           name: "mintNewPosition",
@@ -1765,7 +2033,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     TokenFactory: {
-      address: "0x8a52893C546eb2BF2CB85444317a7F750fEB05bB",
+      address: "0xd1618D0D4cfAE635C1Ca7a585c6a85b76adE5904",
       abi: [
         {
           inputs: [],
@@ -1845,12 +2113,6 @@ const deployedContracts = {
               name: "symbol",
               type: "string",
             },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "date",
-              type: "uint256",
-            },
           ],
           name: "TokenCreated",
           type: "event",
@@ -1893,68 +2155,10 @@ const deployedContracts = {
               name: "symbol",
               type: "string",
             },
-            {
-              internalType: "bytes32",
-              name: "salt",
-              type: "bytes32",
-            },
           ],
           name: "createToken",
           outputs: [],
           stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "name",
-              type: "string",
-            },
-            {
-              internalType: "string",
-              name: "symbol",
-              type: "string",
-            },
-            {
-              internalType: "bytes32",
-              name: "salt",
-              type: "bytes32",
-            },
-          ],
-          name: "findDeploymentAddress",
-          outputs: [
-            {
-              internalType: "address",
-              name: "deploymentAddress",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "name",
-              type: "string",
-            },
-            {
-              internalType: "string",
-              name: "symbol",
-              type: "string",
-            },
-          ],
-          name: "getCreationCode",
-          outputs: [
-            {
-              internalType: "bytes",
-              name: "creationCode",
-              type: "bytes",
-            },
-          ],
-          stateMutability: "view",
           type: "function",
         },
         {
