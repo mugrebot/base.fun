@@ -44,13 +44,14 @@ const Input = styled.input`
 
 const Button = styled.button`
   padding: 12px 24px;
-  color: white;
+  color: Black;
   background-color: #48bb78; // Use a green shade consistent with other buttons
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px; // Larger text for easier interaction
   margin-top: 20px;
+  margin-left: 5px;
   &:hover {
     background-color: #36a167; // Slightly darker on hover for a pleasant effect
   }
@@ -111,7 +112,7 @@ const ContractPage = () => {
     functionName: "calculateMintCost",
     abi: Token.abi as Abi,
     address: address,
-    args: [totalSupply, amount],
+    args: [totalSupply, amount*BigInt(10**18)],
   });
 
   const {
@@ -125,9 +126,20 @@ const ContractPage = () => {
     value: calculateMintCost,
   });
 
+  //handle burn
+  const {
+    writeAsync: burnIt,
+    isLoading: burnItLoading,
+  } = useScaffoldContractWrite({
+    contractName: "Token",
+    functionName: "burn",
+    address: address,
+    args: [amount],
+  });
+  
+
   const handleCalculateEth = async () => {
     const mintamount = amount;
-    console.log("Mint amount:", mintamount);
     try {
       const mintCost = calculateMintCost;
       console.log("Mint cost:", mintCost?.toString());
@@ -142,8 +154,9 @@ const ContractPage = () => {
     handleCalculateEth();
     if (address || !mintItLoading) {
       const mintValue = calculateMintCost;
+  
       mintIt({
-        args: [amount],
+        args: [amount * BigInt(10**18)],
         value: mintValue + BigInt(1),
       })
         .then(() => {
@@ -151,11 +164,28 @@ const ContractPage = () => {
         })
         .catch(error => {
           console.error("Minting failed:", error);
+          console.log("Minting:", amount * BigInt(10^18));
         });
     } else {
       alert("Please connect your wallet");
     }
   };
+
+  const handleBurn = () => {
+    if (address || !burnItLoading) {
+      burnIt({
+        args: [amount * BigInt(10**18)],
+      })
+        .then(() => {
+          console.log("Burning successful");
+        })
+        .catch(error => {
+          console.error("Burning failed:", error);
+        });
+    } else {
+      alert("Please connect your wallet");
+    }
+  }
 
   const { data: liqBalance, isError, isLoading } = useBalance({ address: address });
 
@@ -167,7 +197,7 @@ const ContractPage = () => {
   const balanceInWei = BigInt(liqBalance?.value?.toString() || "0");
   const progress = (Number(balanceInWei) / Number(liqThreshold)) * 100;
 
-  console.log(amount);
+  console.log(amount * BigInt(10**18));
   console.log(totalSupply);
   console.log(calculateMintCost);
 
@@ -183,9 +213,13 @@ const ContractPage = () => {
         <ProgressBarContainer>
           <ProgressBarFill style={{ width: `${progress}%` }} />
         </ProgressBarContainer>
-        <Input type="number" value={Number(amount)} onChange={e => setAmount((e.target.value))} />
+        <Input type="number" value={Number(amount)} onChange={e => setAmount((BigInt(e.target.value)))} />
+        <br />
         <Button onClick={handleMint} disabled={mintItLoading}>
           {mintItLoading ? "Minting..." : "Mint"}
+        </Button>
+        <Button onClick={handleBurn} disabled={burnItLoading}>
+          {burnItLoading ? "Burning..." : "Burn"}
         </Button>
       </Form>
     </StyledPage>
