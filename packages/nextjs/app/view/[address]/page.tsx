@@ -16,21 +16,26 @@ const StyledPage = styled.div`
   padding: 20px;
 `;
 
+//fit text to the container
+
 const Form = styled.div`
   background: #013220;
   padding: 32px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 500px;
+  max-width: 700px;
 `;
 
 const Title = styled.h1`
   margin-bottom: 20px;
+  width: 100%;
+  font-size: calc(1vw + 1vh); // Larger font size for readability
 `;
 
 const Subtitle = styled.h2`
   margin: 10px 0;
+  font-size: calc(1vw + 1vh); // Larger font size for readability
 `;
 
 const Input = styled.input`
@@ -39,7 +44,7 @@ const Input = styled.input`
   width: 300px; // Wider input for better accessibility
   border: 2px solid #ddd;
   border-radius: 4px;
-  font-size: 16px; // Larger font size for readability
+  font-size: calc(1vw + 1vh); // Larger font size for readability
 `;
 
 const Button = styled.button`
@@ -204,8 +209,8 @@ const ContractPage = () => {
         <Subtitle>Name: {name}</Subtitle>
         <Subtitle>Owner: {owner}</Subtitle>
         <Subtitle>Symbol: {symbol}</Subtitle>
-        <p>Liquidity: {liqBalance?.formatted} ETH</p>
-        <p>Threshold: 0.5 ETH</p>
+        <Subtitle>Liquidity: {liqBalance?.formatted} ETH</Subtitle>
+        <Subtitle>Threshold: 0.5 ETH</Subtitle>
         <ProgressBarContainer>
           <ProgressBarFill style={{ width: `${progress}%` }} />
         </ProgressBarContainer>
