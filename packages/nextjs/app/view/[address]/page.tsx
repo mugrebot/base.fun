@@ -99,8 +99,22 @@ const ContractPage = () => {
     address: address,
   });
 
+  const { data: totalSupply } = useScaffoldContractRead({
+    contractName: "Token",
+    functionName: "totalSupply",
+    abi: Token.abi as Abi,
+    address: address,
+  });
+
+  const {data: calculateMintCost } = useScaffoldContractRead({
+    contractName: "Token",
+    functionName: "calculateMintCost",
+    abi: Token.abi as Abi,
+    address: address,
+    args: [totalSupply, amount],
+  });
+
   const {
-    data: calculateMintCost,
     writeAsync: mintIt,
     isLoading: mintItLoading,
   } = useScaffoldContractWrite({
@@ -108,12 +122,17 @@ const ContractPage = () => {
     functionName: "mint",
     address: address,
     args: [amount],
-    value: parseUnits(calculatedEth.toString(), 1),
+    value: calculateMintCost,
   });
 
   const handleCalculateEth = async () => {
+    const mintamount = amount;
+    console.log("Mint amount:", mintamount);
     try {
-      setCalculatedEth(calculateMintCost || BigInt(0));
+      const mintCost = calculateMintCost;
+      console.log("Mint cost:", mintCost?.toString());
+      setCalculatedEth(mintCost || BigInt(0));
+      console.log("Mint cost:", mintCost?.toString());
     } catch (error) {
       console.error("Error calculating mint cost:", error);
     }
@@ -122,9 +141,9 @@ const ContractPage = () => {
   const handleMint = () => {
     handleCalculateEth();
     if (address || !mintItLoading) {
-      const mintValue = parseUnits(calculatedEth.toString(), 0.1);
+      const mintValue = calculateMintCost;
       mintIt({
-        args: [parseUnits(amount.toString(), 0.1)],
+        args: [amount],
         value: mintValue + BigInt(1),
       })
         .then(() => {
@@ -148,6 +167,10 @@ const ContractPage = () => {
   const balanceInWei = BigInt(liqBalance?.value?.toString() || "0");
   const progress = (Number(balanceInWei) / Number(liqThreshold)) * 100;
 
+  console.log(amount);
+  console.log(totalSupply);
+  console.log(calculateMintCost);
+
   return (
     <StyledPage>
       <Form>
@@ -160,7 +183,7 @@ const ContractPage = () => {
         <ProgressBarContainer>
           <ProgressBarFill style={{ width: `${progress}%` }} />
         </ProgressBarContainer>
-        <Input type="number" value={Number(amount)} onChange={e => setAmount(BigInt(e.target.value))} />
+        <Input type="number" value={Number(amount)} onChange={e => setAmount((e.target.value))} />
         <Button onClick={handleMint} disabled={mintItLoading}>
           {mintItLoading ? "Minting..." : "Mint"}
         </Button>
