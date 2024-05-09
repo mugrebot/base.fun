@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+ // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -12,12 +12,14 @@ import "./token.sol";
     error StartsWithQm();
     error NotValidSignature();
     error NotOwner();
+    error DescriptionTooLong();
 
 contract Profiles is EIP712 {
     using ECDSA for bytes32;
 
     bytes32 public DOMAIN_SEPARATOR;
     mapping (address => string) public ipfsHash;
+    mapping(address => string) public descriptions;
     bytes32 constant private MESSAGE_TYPEHASH = keccak256("Message(string _ipfsHash,address _contract)");
 
     constructor(string memory name, string memory version) EIP712(name, version) {
@@ -53,7 +55,7 @@ function setIpfsHash(string memory _ipfsHash, address _contract, bytes memory si
         revert StartsWithQm();
     }
 
-    if (recoverSigner(_ipfsHash, _contract, signature) == msg.sender) {
+    if (recoverSigner(_ipfsHash, _contract, signature) != msg.sender) {
         revert NotValidSignature();
     }
 
@@ -66,5 +68,20 @@ function setIpfsHash(string memory _ipfsHash, address _contract, bytes memory si
 
     ipfsHash[_token] = _ipfsHash;
 }
+
+    function setDescription(address _token, string memory _description) public {
+        if (bytes(_description).length > 255) {
+            revert DescriptionTooLong();
+        }
+        
+        Token tokenInstance = Token(_token);
+
+        if (tokenInstance.owner() != msg.sender) {
+            revert NotOwner();
+        }
+
+        descriptions[_token] = _description;
+    }
+
 
 }

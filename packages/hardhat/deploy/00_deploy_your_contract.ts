@@ -61,7 +61,7 @@ const deployContracts: DeployFunction = async function (hre: HardhatRuntimeEnvir
     autoMine: true,
   });
 
-  
+  /*
 
   const tokenName = "FARTBEANS2";
   const tokenSymbol = "BEANS2";
@@ -95,7 +95,7 @@ const deployContracts: DeployFunction = async function (hre: HardhatRuntimeEnvir
     autoMine: true,
   });
   console.log("factory deployed to:", tokenDeployer.address); 
-
+*/
 
   /*
 

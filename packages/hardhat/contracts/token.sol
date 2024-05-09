@@ -92,7 +92,7 @@ contract Token is ERC20, Ownable, IERC721Receiver {
         _mint(0x000000000000000000000000000000000000dEaD, 1e18);
 	}
 	modifier whenNotLocked() {
-		if (isLiquidityProvisionLocked) revert LiquidityProvisionLocked();
+		if (isLiquidityProvisionLocked == true) revert LiquidityProvisionLocked();
 		_;
 	}
     //function to get pool address given, tokenA, tokenB and fee
@@ -165,13 +165,13 @@ function mint(uint256 amount) public payable whenNotLocked {
     uint256 mintCost = calculateMintCost(totalSupply(), amount);
     if (msg.value <= mintCost) revert InsufficientETHSent();
     // If threshold is reached and not locked, provide liquidity
-    if (isLiquidityProvisionLocked = false && address(this).balance >= liquidityProvisionThreshold) {
+    if (address(this).balance >= liquidityProvisionThreshold && isLiquidityProvisionLocked==false) {
         isLiquidityProvisionLocked = true;
         // Wrap the ETH to WETH
         _wrapETH();
         // Add liquidity to the pool
         this.mintNewPosition(IERC20(address(weth)).balanceOf(address(this)), IERC20(address(weth)).balanceOf(address(this)));
-    }
+    } 
  //this is to supply liquidity to the pool 
  //fee will be 5% of the mint amount
     uint256 fee = amount * 5 / 100;
@@ -180,9 +180,13 @@ function mint(uint256 amount) public payable whenNotLocked {
     _mint(msg.sender, remainder);
     if (msg.value >= mintCost) {
         payable(msg.sender).transfer(msg.value - mintCost);
+    
+
+
+   
     }
 
-    emit TokenMinted(msg.sender, amount);
+     emit TokenMinted(msg.sender, amount);
 
 }
 
