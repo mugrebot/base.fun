@@ -37,7 +37,6 @@ p {
   color: #1b5e20; /* Dark green text for high contrast */
   font-family: Arial, sans-serif;
   width: 100%;
-  min-height: 100vh;
 }
 
 .header {
@@ -71,6 +70,7 @@ h1, h2 {
 }
 
 p {
-  line-height: 1.6;
+  line-height: 1.5;
+  font-size: calc(1vw + 1vh);
 }
 
