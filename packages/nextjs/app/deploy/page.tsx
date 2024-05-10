@@ -77,7 +77,7 @@ const Button = styled.button`
 const Subtitle = styled.h2`
   margin: 10px 0;
   font-size: calc(1vw + 1vh); // Larger font size for readability
-  textDecoration: underline;
+  text-decoration: underline;
 `;
 
 export default function Deploy() {
