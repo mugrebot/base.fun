@@ -28,7 +28,7 @@ const Form = styled.div`
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 500px;
+  max-width: 700px;
 `;
 
 const Title = styled.h1`
@@ -71,6 +71,12 @@ const Button = styled.button`
   &:hover {
     background-color: #38a169;
   }
+`;
+
+const Subtitle = styled.h2`
+  margin: 10px 0;
+  font-size: calc(1vw + 1vh); // Larger font size for readability
+  textDecoration: underline;
 `;
 
 export default function Deploy() {
@@ -179,9 +185,9 @@ export default function Deploy() {
         </Button>
         <div>
           {transactionResponse && !contractAddress && <p>Checking the chain....</p>}
-          {transactionResponse && contractAddress && (
+          {!transactionResponse && !contractAddress && (
             <Link href={`/view/${contractAddress}`} passHref>
-              <p style={{ textDecoration: "underline" }}>deployed at: {contractAddress}</p>
+              <Subtitle>deployed at: 0x41e12490c2eE97bD8295051146f00C10D00956dA</Subtitle>
             </Link>
           )}
         </div>
