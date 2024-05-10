@@ -76,7 +76,7 @@ const Input = styled.input`
 const Button = styled.button`
   padding: 12px 24px;
   color: Black;
-  background-color: #48bb78; // Use a green shade consistent with other buttons
+  background-color: "#90ee90"; // Use a green shade consistent with other buttons
   border: none;
   border-radius: 4px;
   cursor: pointer;

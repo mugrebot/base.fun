@@ -48,7 +48,7 @@ module.exports = {
           neutral: "#212638",
           "neutral-content": "#e8f5e9",
           "base-100": "#303030", // Darker background in dark theme
-          "base-200": "#1b5e20", // Deep dark background
+          "base-200": "#092215", // Deep dark background
           "base-300": "#1b5e20", // Very dark green for tertiary areas
           "base-content": "#90ee90", // Text color on dark background
           info: "#2196f3",

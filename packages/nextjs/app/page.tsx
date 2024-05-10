@@ -6,11 +6,10 @@ import styled from "styled-components";
 const StyledPage = styled.div`
   display: flex;
   flex-direction: column;
-  background-color: #4caf50; /* A light green background */
-  color: #1b5e20; /* Dark green text for high contrast */
+  background-color: #092215; /* A light green background */
+  color: "#90ee90"; /* Dark green text for high contrast */
   font-family: Arial, sans-serif;
   width: 100%;
-
 `;
 interface CardProps {
   title: string;
