@@ -20,6 +20,7 @@ contract Profiles is EIP712 {
     bytes32 public DOMAIN_SEPARATOR;
     mapping (address => string) public ipfsHash;
     mapping(address => string) public descriptions;
+
     bytes32 constant private MESSAGE_TYPEHASH = keccak256("Message(string _ipfsHash,address _contract)");
 
     constructor(string memory name, string memory version) EIP712(name, version) {
@@ -36,17 +37,12 @@ contract Profiles is EIP712 {
         return digest;
     }
 
-    function verifySignature(string memory _ipfsHash, address _contract, bytes memory signature) public view returns (bool) {
-        bytes32 message = createMessage(_ipfsHash, _contract);
-        return ECDSA.recover(message, signature) == msg.sender;
-    }
-
     function recoverSigner(string memory _ipfsHash, address _contract, bytes memory signature) public view returns (address) {
         bytes32 message = createMessage(_ipfsHash, _contract);
         return ECDSA.recover(message, signature);
     }
 
-function setIpfsHash(string memory _ipfsHash, address _contract, bytes memory signature, address payable _token) public {
+function setIpfsHash(string memory _ipfsHash, string memory _message, address payable _contract, bytes memory signature) public {
     if (bytes(_ipfsHash).length != 46) {
         revert NotIPFSHash();
     }
@@ -55,32 +51,35 @@ function setIpfsHash(string memory _ipfsHash, address _contract, bytes memory si
         revert StartsWithQm();
     }
 
-    if (recoverSigner(_ipfsHash, _contract, signature) != msg.sender) {
+    if (recoverSigner(_message, _contract, signature) != msg.sender) {
         revert NotValidSignature();
     }
 
-
-    Token tokenInstance = Token(_token);
+    Token tokenInstance = Token(_contract);
 
     if (tokenInstance.owner() != msg.sender) {
         revert NotOwner();
     }
 
-    ipfsHash[_token] = _ipfsHash;
+    ipfsHash[_contract] = _ipfsHash;
 }
 
-    function setDescription(address _token, string memory _description) public {
+    function setDescription(string memory _ipfsHash, address payable _contract, bytes memory signature, string memory _description) public {
         if (bytes(_description).length > 255) {
             revert DescriptionTooLong();
         }
+
+        if (recoverSigner(_ipfsHash, _contract, signature) != msg.sender) {
+        revert NotValidSignature();
+    }
         
-        Token tokenInstance = Token(_token);
+        Token tokenInstance = Token(_contract);
 
         if (tokenInstance.owner() != msg.sender) {
             revert NotOwner();
         }
 
-        descriptions[_token] = _description;
+        descriptions[_contract] = _description;
     }
 
 

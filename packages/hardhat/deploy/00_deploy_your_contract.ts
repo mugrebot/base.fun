@@ -61,7 +61,7 @@ const deployContracts: DeployFunction = async function (hre: HardhatRuntimeEnvir
     autoMine: true,
   });
 
-  /*
+  
 
   const tokenName = "FARTBEANS2";
   const tokenSymbol = "BEANS2";
@@ -95,7 +95,7 @@ const deployContracts: DeployFunction = async function (hre: HardhatRuntimeEnvir
     autoMine: true,
   });
   console.log("factory deployed to:", tokenDeployer.address); 
-*/
+
 
   /*
 
@@ -126,9 +126,46 @@ console.log("unipool deployed to:", unipooldeployer.address);
 };
 */
 
+await hre.run("verify:verify", {
+  address: profile_verifier_contract.address,
+  constructorArguments: ["TokenProfile", "1"],
+});
+
+await hre.run("verify:verify", {
+  address: token.address,
+  constructorArguments: [
+    tokenName,
+    tokenSymbol,
+    WETHaddress,
+    UniswapAddress,
+    positionManager,
+    treasuryWallet
+  ],
+});
+
+await hre.run("verify:verify", {
+  address: tokenDeployer.address,
+  constructorArguments: [],
+});
+
 };
 
-
+//verify the contracts Profiles, Token, TokenFactory
+/*
+verification is as follows:
+await hre.run("verify:verify", {
+  address: contractAddress,
+  constructorArguments: [
+    50,
+    "a string argument",
+    {
+      x: 10,
+      y: 5,
+    },
+    "0xabcdef",
+  ],
+});
+*/
 
 
 export default deployContracts;

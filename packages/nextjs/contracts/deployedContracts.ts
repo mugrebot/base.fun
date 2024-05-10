@@ -171,7 +171,7 @@ const deployedContracts = {
   },
   84532: {
     Profiles: {
-      address: "0xC4e5bCc989E420f16B684b6F327618e97E908d63",
+      address: "0xD0a2b7E63945b02396AD52BF1487142fa581c4e5",
       abi: [
         {
           inputs: [
@@ -413,9 +413,19 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "address",
-              name: "_token",
+              internalType: "string",
+              name: "_ipfsHash",
+              type: "string",
+            },
+            {
+              internalType: "address payable",
+              name: "_contract",
               type: "address",
+            },
+            {
+              internalType: "bytes",
+              name: "signature",
+              type: "bytes",
             },
             {
               internalType: "string",
@@ -436,7 +446,12 @@ const deployedContracts = {
               type: "string",
             },
             {
-              internalType: "address",
+              internalType: "string",
+              name: "_message",
+              type: "string",
+            },
+            {
+              internalType: "address payable",
               name: "_contract",
               type: "address",
             },
@@ -444,45 +459,11 @@ const deployedContracts = {
               internalType: "bytes",
               name: "signature",
               type: "bytes",
-            },
-            {
-              internalType: "address payable",
-              name: "_token",
-              type: "address",
             },
           ],
           name: "setIpfsHash",
           outputs: [],
           stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "_ipfsHash",
-              type: "string",
-            },
-            {
-              internalType: "address",
-              name: "_contract",
-              type: "address",
-            },
-            {
-              internalType: "bytes",
-              name: "signature",
-              type: "bytes",
-            },
-          ],
-          name: "verifySignature",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
           type: "function",
         },
       ],
@@ -491,7 +472,7 @@ const deployedContracts = {
       },
     },
     Token: {
-      address: "0x04d4e4c602070819b763b36Aa09E8B3fCB4bd7B8",
+      address: "0x4B06b442819dd74bf6cd222DF2dB78e25A701B89",
       abi: [
         {
           inputs: [
@@ -1277,7 +1258,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     TokenFactory: {
-      address: "0x2E8E6397655ce6ec16F236B5F61B85Ca816eE090",
+      address: "0xB3Ad3E105ebAdddfc6A77Be7517A5472b3723b96",
       abi: [
         {
           inputs: [],

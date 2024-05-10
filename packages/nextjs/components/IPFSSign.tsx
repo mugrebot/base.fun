@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useRef, useState } from "react";
 import { Signature } from "viem";
 import { useSignTypedData } from "wagmi";
@@ -60,8 +61,11 @@ const StyledLabel = styled.label`
 export const IPFSSign = ({ address }) => {
   const [signature, setSignature] = useState<Signature | null>(null);
   const [cid, setCid] = useState("");
+  const [hashMessage, setHashMessageString] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [isFileUploaded, setIsFileUploaded] = useState(false);
+  const [isSigned, setIsSigned] = useState(false);
   const inputFileRef = useRef<HTMLInputElement | null>(null);
 
   const APIKEY = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID;
@@ -79,6 +83,9 @@ export const IPFSSign = ({ address }) => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+      console.log(file);
+      setIsFileUploaded(false);
+      setIsSigned(false);
     }
   };
 
@@ -95,6 +102,7 @@ export const IPFSSign = ({ address }) => {
       const content = Buffer.from(reader.result as ArrayBuffer);
       const added = await client.add(content);
       setCid(added.path);
+      setIsFileUploaded(true);
       alert('File uploaded and CID set!');
     };
     reader.readAsArrayBuffer(file);
@@ -117,8 +125,14 @@ export const IPFSSign = ({ address }) => {
     ],
   };
 
+  useEffect(() => {
+  const timestamp_string = Date.now().toString();
+  const hashMessage = `${cid}${timestamp_string}`;
+  setHashMessageString(hashMessage);
+  }, [cid]);
+
   const message = {
-    _ipfsHash: cid,
+    _ipfsHash: hashMessage,
     _contract: address,
   };
 
@@ -129,6 +143,7 @@ export const IPFSSign = ({ address }) => {
     primaryType: "Message",
   });
 
+
   // Method to interact with the contract
   const {
     writeAsync: setIpfsHash,
@@ -138,7 +153,7 @@ export const IPFSSign = ({ address }) => {
   } = useScaffoldContractWrite({
     contractName: "Profiles",
     functionName: "setIpfsHash",
-    args: [cid, address, data, address]
+    args: [cid, hashMessage, address, data]
   });
 
   const {
@@ -149,61 +164,57 @@ export const IPFSSign = ({ address }) => {
   } = useScaffoldContractWrite({
     contractName: "Profiles",
     functionName: "setDescription",
-    args: [address, description]
+    args: [hashMessage, address, data, description]
   });
 
    // Effect to trigger setIpfsHash after successful signing
-   useEffect(() => {
-    if (isSuccess && data) {
+
+  useEffect(() => {
+    if (isSuccess) {
+      setIsSigned(true);
       setSignature(data);
     }
   }, [data, isSuccess]);
 
   return (
     <Container>
-      <Form>
-        <StyledLabel>Profile Image IPFS Hash</StyledLabel>
-        <Input
-          type="text"
-          value={cid}
-          onChange={(e) => setCid(e.target.value)}
-          placeholder="Enter IPFS CID or choose file to upload"
-        />
-<Button type="button" onClick={() => inputFileRef.current?.click()}>Choose File</Button>
-<input
-  type="file"
-  ref={inputFileRef}
-  onChange={handleImageChange}
-  style={{ display: 'none' }}
-/>
-
-<Button type="button" onClick={handleSubmit} disabled={!file}>Upload to IPFS</Button>
-
-
-<Button  type="button" disabled={isLoading} onClick={() => signTypedData()}>
-          Sign and Submit
-        </Button>
-        {isSuccess && 
-        <Button type="button" disabled={setIpfsHashLoading} onClick={() => setIpfsHash()}>
-            Set Profile Image
-            </Button>}
-        {isError && <div>Error signing message</div>}
-        {isSetIpfsHashSuccess && <div>IPFS hash has been set successfully.</div>}
-        {isSetIpfsHashError && <div>Error setting IPFS hash.</div>}
-
-        <StyledLabel>Description</StyledLabel>
-        <Input
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter description (max 255 characters)"
-          maxLength={255}
-        />
-        <Button type="button" disabled={setDescriptionLoading} onClick={() => setDescriptionForAddress()}>
-          Set Description
-        </Button>
-      </Form>
-    </Container>
+    <Form>
+      <StyledLabel>Profile Image IPFS Hash</StyledLabel>
+      <Input
+        type="text"
+        value={cid}
+        onChange={(e) => setCid(e.target.value)}
+        placeholder="Enter IPFS CID or choose file to upload"
+      />
+      <Button type="button" onClick={() => inputFileRef.current?.click()} disabled={isFileUploaded}>Choose File</Button>
+      <input
+        type="file"
+        ref={inputFileRef}
+        onChange={handleImageChange}
+        style={{ display: 'none' }}
+      />
+      <Button type="button" onClick={handleSubmit} disabled={!file || isFileUploaded}>Upload to IPFS</Button>
+      <Button type="button" disabled={!isFileUploaded || isLoading || isSigned} onClick={() => signTypedData()}>
+        Sign and Submit
+      </Button>
+      <Button type="button" disabled={!isSigned || setIpfsHashLoading} onClick={() => setIpfsHash()}>
+        Set Profile Image
+      </Button>
+      {isError && <div>Error signing message</div>}
+      {isSetIpfsHashError && <div>Error setting IPFS hash.</div>}
+      <StyledLabel>Description</StyledLabel>
+      <Input
+        type="text"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Enter description (max 255 characters)"
+        maxLength={255}
+      />
+      <Button type="button" disabled={!isSigned || setDescriptionLoading} onClick={() => setDescriptionForAddress()}>
+        Set Description
+      </Button>
+    </Form>
+  </Container>
   );
 };
 

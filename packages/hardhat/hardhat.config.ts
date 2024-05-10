@@ -21,7 +21,7 @@ const deployerPrivateKey =
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
 
 const config: HardhatUserConfig = {
-  solidity: {
+  solidity: { 
     //set version to anything above 0.7.0
     version: "0.8.20",
     settings: {
@@ -101,7 +101,7 @@ const config: HardhatUserConfig = {
       accounts: [deployerPrivateKey],
     },
     baseSepolia: {
-      url: "https://base-sepolia-rpc.publicnode.com",
+      url: "  https://sepolia.base.org",
       accounts: [deployerPrivateKey],
     },
     scrollSepolia: {

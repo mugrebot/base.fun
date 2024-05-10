@@ -139,7 +139,7 @@ contract Token is ERC20, Ownable, IERC721Receiver {
         )
     {
 
-        if (isLiquidityProvisionLocked == true ) revert NotEnoughMinted();
+        if (isLiquidityProvisionLocked == false ) revert NotEnoughMinted();
 
         IERC20(address(this)).approve(address(positionManager), amount0ToAdd);
         IERC20(address(weth)).approve(address(positionManager), amount1ToAdd);
@@ -160,18 +160,12 @@ contract Token is ERC20, Ownable, IERC721Receiver {
         (tokenId, liquidity, amount0, amount1) = positionManager.mint(params);
     }
 function mint(uint256 amount) public payable whenNotLocked {
-    //needs to mint atleast >= 1 token
-    if (amount < 1 ether) revert NotEnoughMinted();
-    uint256 mintCost = calculateMintCost(totalSupply(), amount);
-    if (msg.value <= mintCost) revert InsufficientETHSent();
-    // If threshold is reached and not locked, provide liquidity
-    if (address(this).balance >= liquidityProvisionThreshold && isLiquidityProvisionLocked==false) {
+        if (address(this).balance >= liquidityProvisionThreshold && isLiquidityProvisionLocked==false) {
         isLiquidityProvisionLocked = true;
-        // Wrap the ETH to WETH
-        _wrapETH();
-        // Add liquidity to the pool
-        this.mintNewPosition(IERC20(address(weth)).balanceOf(address(this)), IERC20(address(weth)).balanceOf(address(this)));
     } 
+    //needs to mint atleast >= 1 token
+    if (amount <= 1e18) revert NotEnoughMinted();
+    uint256 mintCost = calculateMintCost(totalSupply(), amount);
  //this is to supply liquidity to the pool 
  //fee will be 5% of the mint amount
     uint256 fee = amount * 5 / 100;
@@ -180,14 +174,14 @@ function mint(uint256 amount) public payable whenNotLocked {
     _mint(msg.sender, remainder);
     if (msg.value >= mintCost) {
         payable(msg.sender).transfer(msg.value - mintCost);
-    
-
-
-   
     }
+    if (isLiquidityProvisionLocked == true) {
+        // Wrap the ETH to WETH
+        _wrapETH();
+        // Add liquidity to the pool
+        this.mintNewPosition(IERC20(address(this)).balanceOf(address(this)), IERC20(address(weth)).balanceOf(address(this)));
 
-     emit TokenMinted(msg.sender, amount);
-
+}
 }
 
     function burn(uint256 amount) public whenNotLocked {
