@@ -48,6 +48,7 @@ const Input = styled.input`
   width: 100%;
   padding: 12px;
   border: 1px solid #cbd5e0;
+  color: #48bb78;
   border-radius: 4px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
   &:focus {
@@ -61,7 +62,7 @@ const Button = styled.button`
   display: block;
   width: 100%;
   background-color: #48bb78;
-  color: white;
+  color: black;
   border: none;
   padding: 16px;
   font-size: 16px;
