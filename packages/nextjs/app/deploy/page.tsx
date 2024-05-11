@@ -186,9 +186,9 @@ export default function Deploy() {
         </Button>
         <div>
           {transactionResponse && !contractAddress && <p>Checking the chain....</p>}
-          {!transactionResponse && !contractAddress && (
+          {transactionResponse && contractAddress && (
             <Link href={`/view/${contractAddress}`} passHref>
-              <Subtitle>deployed at: 0x41e12490c2eE97bD8295051146f00C10D00956dA</Subtitle>
+              <Subtitle>deployed at: {contractAddress}</Subtitle>
             </Link>
           )}
         </div>
